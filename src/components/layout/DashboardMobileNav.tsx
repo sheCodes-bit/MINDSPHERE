@@ -25,7 +25,7 @@ export function DashboardMobileNav() {
   const pathname = usePathname()
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-neutral-950/95 border-t border-neutral-800 flex justify-around py-2 px-1 backdrop-blur-md">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 border-t border-slate-200 flex justify-around py-2 px-1 backdrop-blur-md">
       {MOBILE_LINKS.map(({ href, label, icon: Icon }) => {
         const isActive = href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
         return (
@@ -34,7 +34,7 @@ export function DashboardMobileNav() {
             href={href}
             className={cn(
               'flex flex-col items-center gap-1 text-[10px] px-2 py-1 transition-colors',
-              isActive ? 'text-indigo-400' : 'text-slate-400 hover:text-indigo-400'
+              isActive ? 'text-blue-600' : 'text-slate-500 hover:text-blue-600'
             )}
           >
             <Icon className="h-4 w-4" />

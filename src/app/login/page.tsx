@@ -1,21 +1,31 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Brain, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { startGoogleOAuth } from '@/lib/supabase/oauth'
 import { signInSchema, type SignInInput } from '@/lib/validations/schemas'
+import { BrandLogo } from '@/components/BrandLogo'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') ?? '/dashboard'
+  const errorParam = searchParams.get('error')
+  const errorDescription = searchParams.get('error_description')
   const [showPassword, setShowPassword] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+
+  useEffect(() => {
+    if (errorParam) {
+      toast.error(errorDescription || 'Sign-in could not be completed. Please try again.')
+    }
+  }, [errorParam, errorDescription])
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
@@ -39,15 +49,9 @@ function LoginForm() {
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true)
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
-      },
-    })
+    const { error } = await startGoogleOAuth(`${window.location.origin}/auth/callback?next=${redirectTo}`)
     if (error) {
-      toast.error('Google sign-in failed. Please try again.')
+      toast.error(error)
       setGoogleLoading(false)
     }
   }
@@ -57,17 +61,9 @@ function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 group mb-6">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 flex items-center justify-center shadow-glow-sm">
-              <Brain className="h-5 w-5 text-white" aria-hidden />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-lg font-black tracking-wider text-white">NEX<span className="text-indigo-400">ORA</span></span>
-              <span className="text-[9px] font-semibold tracking-widest text-slate-400 uppercase -mt-1">Regional Challenge</span>
-            </div>
-          </Link>
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="text-slate-400 text-sm mt-2">Sign in to your account</p>
+          <BrandLogo className="justify-center mb-6" imgClassName="h-12" />
+          <h1 className="text-2xl font-bold text-slate-900 font-display">Welcome back</h1>
+          <p className="text-slate-500 text-sm mt-2">Sign in to your account</p>
         </div>
 
         {/* Card */}
@@ -77,10 +73,10 @@ function LoginForm() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || isSubmitting}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-neutral-700 text-sm font-medium text-white hover:bg-neutral-800 hover:border-neutral-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-slate-300 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
           >
             {googleLoading ? (
-              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="h-4 w-4 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
             ) : (
               <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -93,14 +89,14 @@ function LoginForm() {
           </button>
 
           <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-neutral-800" /></div>
-            <div className="relative flex justify-center"><span className="bg-slate-900 px-3 text-xs text-slate-600">or continue with email</span></div>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+            <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-slate-500">or continue with email</span></div>
           </div>
 
           {/* Email form */}
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">Email address</label>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">Email address</label>
               <input
                 id="email"
                 type="email"
@@ -110,13 +106,13 @@ function LoginForm() {
                 {...register('email')}
                 aria-describedby={errors.email ? 'email-error' : undefined}
               />
-              {errors.email && <p id="email-error" className="mt-1.5 text-xs text-red-400">{errors.email.message}</p>}
+              {errors.email && <p id="email-error" className="mt-1.5 text-xs text-red-600">{errors.email.message}</p>}
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-medium text-slate-300">Password</label>
-                <Link href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot password?</Link>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
+                <Link href="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</Link>
               </div>
               <div className="relative">
                 <input
@@ -128,11 +124,11 @@ function LoginForm() {
                   {...register('password')}
                   aria-describedby={errors.password ? 'password-error' : undefined}
                 />
-                <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
                 </button>
               </div>
-              {errors.password && <p id="password-error" className="mt-1.5 text-xs text-red-400">{errors.password.message}</p>}
+              {errors.password && <p id="password-error" className="mt-1.5 text-xs text-red-600">{errors.password.message}</p>}
             </div>
 
             <button type="submit" disabled={isSubmitting} className="btn-primary w-full justify-center py-3">
@@ -142,7 +138,7 @@ function LoginForm() {
 
           <p className="mt-6 text-center text-sm text-slate-500">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+            <Link href="/register" className="text-blue-600 hover:text-blue-700 transition-colors font-medium">
               Register your team
             </Link>
           </p>
@@ -154,7 +150,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-400">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500">Loading...</div>}>
       <LoginForm />
     </Suspense>
   )

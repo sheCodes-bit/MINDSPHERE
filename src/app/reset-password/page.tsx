@@ -5,10 +5,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Cpu, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validations/schemas'
+import { BrandLogo } from '@/components/BrandLogo'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -43,14 +44,14 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-deep">
+      <div className="min-h-screen flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md text-center">
           <div className="glass-card p-10">
-            <div className="h-16 w-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-8 w-8 text-emerald-400" />
+            <div className="h-16 w-16 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="h-8 w-8 text-emerald-600" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Password Reset Successful</h1>
-            <p className="text-slate-400 text-sm mb-6">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2 font-display">Password Reset Successful</h1>
+            <p className="text-slate-500 text-sm mb-6">
               Your password has been changed. You will now be redirected to sign in.
             </p>
             <Link href="/login" className="btn-primary w-full justify-center py-3">
@@ -63,30 +64,18 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-deep">
+    <div className="min-h-screen flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-6 group">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 flex items-center justify-center shadow-glow-sm">
-              <Cpu className="h-5 w-5 text-white" aria-hidden />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-lg font-black tracking-wider text-white">
-                NEX<span className="text-indigo-400">ORA</span>
-              </span>
-              <span className="text-[9px] font-semibold tracking-widest text-slate-400 uppercase -mt-1">
-                Regional Challenge
-              </span>
-            </div>
-          </Link>
-          <h1 className="text-2xl font-bold text-white">Create New Password</h1>
-          <p className="text-slate-400 text-sm mt-2">Enter your new secure password below</p>
+          <BrandLogo className="justify-center mb-6" imgClassName="h-12" />
+          <h1 className="text-2xl font-bold text-slate-900 font-display">Create New Password</h1>
+          <p className="text-slate-500 text-sm mt-2">Enter your new secure password below</p>
         </div>
 
         <div className="glass-card p-8">
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                 New Password
               </label>
               <div className="relative">
@@ -101,21 +90,21 @@ export default function ResetPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1.5 text-xs text-red-400">{errors.password.message}</p>
+                <p className="mt-1.5 text-xs text-red-600">{errors.password.message}</p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="confirm_password"
-                className="block text-sm font-medium text-slate-300 mb-2"
+                className="block text-sm font-medium text-slate-700 mb-2"
               >
                 Confirm New Password
               </label>
@@ -128,7 +117,7 @@ export default function ResetPasswordPage() {
                 {...register('confirm_password')}
               />
               {errors.confirm_password && (
-                <p className="mt-1.5 text-xs text-red-400">{errors.confirm_password.message}</p>
+                <p className="mt-1.5 text-xs text-red-600">{errors.confirm_password.message}</p>
               )}
             </div>
 

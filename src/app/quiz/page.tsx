@@ -197,49 +197,49 @@ function QuizArenaContent() {
   // VIEW 1: PRE-QUIZ BRIEFING
   if (!attempt && !isFinished) {
     return (
-      <div className="min-h-screen bg-deep text-white flex items-center justify-center p-4">
-        <div className="glass-card max-w-xl w-full p-8 text-center space-y-6 border-neutral-700">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center mx-auto shadow-glow-md">
-            <Trophy className="h-8 w-8 text-white" />
+      <div className="min-h-screen bg-deep text-slate-900 flex items-center justify-center p-4">
+        <div className="glass-card max-w-xl w-full p-8 text-center space-y-6 border-slate-300">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-fuchsia-600 flex items-center justify-center mx-auto shadow-glow-md">
+            <Trophy className="h-8 w-8 text-slate-900" />
           </div>
 
           <div>
             <span className="badge-accent mb-2 inline-flex">Online Arena</span>
-            <h1 className="text-2xl font-black text-white mt-2">
+            <h1 className="text-2xl font-black text-slate-900 mt-2">
               Round {roundParam} — MCQ Screening
             </h1>
-            <p className="text-slate-400 text-sm mt-2 leading-relaxed">
+            <p className="text-slate-500 text-sm mt-2 leading-relaxed">
               Answer the assigned questions within the official time window. The server deadline is authoritative.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 text-xs">
+          <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50/60 border border-slate-200 text-xs">
             <div>
               <span className="text-slate-500 block">Questions</span>
-              <span className="font-bold text-white text-base font-mono">5 MCQs</span>
+              <span className="font-bold text-slate-900 text-base font-mono">5 MCQs</span>
             </div>
             <div>
               <span className="text-slate-500 block">Time Per Q</span>
-              <span className="font-bold text-white text-base font-mono">
+              <span className="font-bold text-slate-900 text-base font-mono">
                 {roundParam === '1' ? '30s' : '45s'}
               </span>
             </div>
             <div>
               <span className="text-slate-500 block">Scoring</span>
-              <span className="font-bold text-emerald-400 text-base font-mono">+1 pt</span>
+              <span className="font-bold text-emerald-600 text-base font-mono">+1 pt</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/20 text-xs text-slate-300 text-left space-y-1.5">
-            <p className="font-semibold text-white flex items-center gap-1.5">
-              <Shield className="h-3.5 w-3.5 text-indigo-400" /> Competition Directives:
+          <div className="p-4 rounded-xl bg-blue-50/20 border border-blue-200/20 text-xs text-slate-600 text-left space-y-1.5">
+            <p className="font-semibold text-slate-900 flex items-center gap-1.5">
+              <Shield className="h-3.5 w-3.5 text-blue-600" /> Competition Directives:
             </p>
             <p>• Once launched, the timer runs continuously on the server.</p>
             <p>• Only the team captain can submit or finalize answers.</p>
             <p>• Closing or reloading the tab does not pause the countdown.</p>
           </div>
 
-          <div className="flex items-center justify-between gap-4 pt-4 border-t border-neutral-800">
+          <div className="flex items-center justify-between gap-4 pt-4 border-t border-slate-200">
             <Link href="/dashboard" className="btn-ghost text-xs px-5 py-2.5">
               Back to Dashboard
             </Link>
@@ -259,38 +259,38 @@ function QuizArenaContent() {
   // VIEW 2: ROUND FINISHED SCREEN
   if (isFinished) {
     return (
-      <div className="min-h-screen bg-deep text-white flex items-center justify-center p-4">
-        <div className="glass-card max-w-lg w-full p-8 text-center space-y-6 border-neutral-700">
-          <div className="h-16 w-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto">
-            <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+      <div className="min-h-screen bg-deep text-slate-900 flex items-center justify-center p-4">
+        <div className="glass-card max-w-lg w-full p-8 text-center space-y-6 border-slate-300">
+          <div className="h-16 w-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
 
           <div>
-            <h1 className="text-2xl font-black text-white">Round Completed</h1>
-            <p className="text-slate-400 text-sm mt-1">{finishMessage}</p>
+            <h1 className="text-2xl font-black text-slate-900">Round Completed</h1>
+            <p className="text-slate-500 text-sm mt-1">{finishMessage}</p>
           </div>
 
           {attempt && (
-            <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-3">
+            <div className="p-5 rounded-2xl bg-slate-50/60 border border-slate-200 space-y-3">
               <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold block">
                 Session Performance
               </span>
-              <div className="text-4xl font-black font-mono text-indigo-400">
+              <div className="text-4xl font-black font-mono text-blue-600">
                 {Number(attempt.total_score).toFixed(1)}{' '}
-                <span className="text-sm font-sans text-slate-400">pts</span>
+                <span className="text-sm font-sans text-slate-500">pts</span>
               </div>
-              <div className="flex justify-around pt-3 border-t border-neutral-800/80 text-xs">
+              <div className="flex justify-around pt-3 border-t border-slate-200/80 text-xs">
                 <div>
                   <span className="text-slate-500 block">Answered</span>
-                  <span className="font-bold text-white font-mono">{attempt.questions_answered}</span>
+                  <span className="font-bold text-slate-900 font-mono">{attempt.questions_answered}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Correct</span>
-                  <span className="font-bold text-emerald-400 font-mono">{attempt.questions_correct}</span>
+                  <span className="font-bold text-emerald-600 font-mono">{attempt.questions_correct}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Skipped</span>
-                  <span className="font-bold text-slate-400 font-mono">{attempt.questions_skipped}</span>
+                  <span className="font-bold text-slate-500 font-mono">{attempt.questions_skipped}</span>
                 </div>
               </div>
             </div>
@@ -313,24 +313,24 @@ function QuizArenaContent() {
   const currentQ = questions[currentIndex]
 
   return (
-    <div className="min-h-screen bg-deep text-white flex flex-col justify-between p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-deep text-slate-900 flex flex-col justify-between p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
       {/* Top Session Bar */}
       <div className="glass-card p-4 flex items-center justify-between gap-4 mb-6">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-400 block">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-blue-600 block">
             {round?.name || `Round ${roundParam}`}
           </span>
-          <p className="text-xs font-semibold text-slate-300">
-            Question <span className="text-white font-mono">{currentIndex + 1}</span> of{' '}
-            <span className="text-white font-mono">{questions.length}</span>
+          <p className="text-xs font-semibold text-slate-600">
+            Question <span className="text-slate-900 font-mono">{currentIndex + 1}</span> of{' '}
+            <span className="text-slate-900 font-mono">{questions.length}</span>
           </p>
         </div>
 
         {/* Server-Authoritative Countdown Indicator */}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-mono font-bold text-sm ${
           timeLeft <= 10
-            ? 'bg-red-500/20 text-red-300 border-red-500/40 animate-pulse'
-            : 'bg-neutral-900 text-indigo-300 border-neutral-700'
+            ? 'bg-red-50 text-red-700 border-red-200 animate-pulse'
+            : 'bg-slate-50 text-blue-600 border-slate-300'
         }`}>
           <Clock className="h-4 w-4" />
           <span>{formattedTime}</span>
@@ -344,17 +344,17 @@ function QuizArenaContent() {
             <div className="flex items-center gap-2">
               <span className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                 currentQ.difficulty === 'easy'
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   : currentQ.difficulty === 'hard'
-                  ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                  : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                  ? 'bg-red-50 text-red-700 border-red-200'
+                  : 'bg-amber-100 text-amber-600 border-amber-200'
               }`}>
                 {currentQ.difficulty || 'Medium'}
               </span>
               <span className="text-xs text-slate-500">• Single Correct Answer</span>
             </div>
 
-            <h2 className="text-lg sm:text-xl font-bold text-white leading-relaxed">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 leading-relaxed">
               {currentQ.questionText}
             </h2>
           </div>
@@ -372,33 +372,33 @@ function QuizArenaContent() {
                   onClick={() => setSelectedOptionId(opt.id)}
                   className={`w-full p-4 rounded-xl border text-left transition-all flex items-center gap-3.5 ${
                     isSelected
-                      ? 'border-indigo-500 bg-indigo-600/20 text-white shadow-glow-sm'
-                      : 'border-neutral-800 bg-neutral-900/50 text-slate-300 hover:border-neutral-700 hover:bg-neutral-900'
+                      ? 'border-blue-500 bg-blue-50 text-slate-900 shadow-glow-sm'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-blue-50/40'
                   }`}
                 >
                   <div
                     className={`h-7 w-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
                       isSelected
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-neutral-800 text-slate-400'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-500'
                     }`}
                   >
                     {letter}
                   </div>
                   <span className="text-sm leading-relaxed flex-1">{opt.option_text}</span>
-                  {isSelected && <Check className="h-4 w-4 text-indigo-400 shrink-0" />}
+                  {isSelected && <Check className="h-4 w-4 text-blue-600 shrink-0" />}
                 </button>
               )
             })}
           </div>
 
           {/* Actions Bar */}
-          <div className="flex items-center justify-between pt-4 border-t border-neutral-800">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-200">
             <button
               type="button"
               onClick={handleSkipQuestion}
               disabled={submitting}
-              className="btn-ghost text-xs px-4 py-2 text-slate-400 hover:text-white"
+              className="btn-ghost text-xs px-4 py-2 text-slate-500 hover:text-slate-900"
             >
               Skip Question
             </button>
@@ -420,7 +420,7 @@ function QuizArenaContent() {
           </div>
         </div>
       ) : (
-        <div className="glass-card p-12 text-center text-slate-400">
+        <div className="glass-card p-12 text-center text-slate-500">
           Loading question data...
         </div>
       )}
@@ -430,7 +430,7 @@ function QuizArenaContent() {
 
 export default function QuizArenaPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-400">Loading arena...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500">Loading arena...</div>}>
       <QuizArenaContent />
     </Suspense>
   )

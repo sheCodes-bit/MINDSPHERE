@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { HeroSection } from '@/components/sections/HeroSection'
+import { StatsBand } from '@/components/sections/StatsBand'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { SubjectsSection } from '@/components/sections/SubjectsSection'
 import { RoundsSection } from '@/components/sections/RoundsSection'
@@ -44,6 +45,7 @@ export default async function HomePage() {
       <Navbar />
       <main id="main-content">
         <HeroSection settings={settingsMap} />
+        <StatsBand />
         <AboutSection />
         <SubjectsSection subjects={subjects} />
         <RoundsSection />

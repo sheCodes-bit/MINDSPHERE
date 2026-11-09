@@ -50,9 +50,9 @@ export default async function DashboardResultsPage() {
       <div className="p-6 md:p-8 max-w-3xl">
         <div className="glass-card p-10 text-center">
           <Trophy className="h-10 w-10 text-slate-600 mx-auto mb-3" />
-          <h1 className="text-xl font-bold text-white mb-2">No Registered Team</h1>
-          <p className="text-slate-400 text-sm mb-6">
-            Register a team to compete and track round scores in NEXORA.
+          <h1 className="text-xl font-bold text-slate-900 mb-2">No Registered Team</h1>
+          <p className="text-slate-500 text-sm mb-6">
+            Register a team to compete and track round scores in COMSATS VSPARK.
           </p>
           <Link href="/dashboard/team" className="btn-primary text-xs px-5 py-2.5">
             Register Team
@@ -92,12 +92,12 @@ export default async function DashboardResultsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2.5">
-            <BarChart3 className="h-6 w-6 text-indigo-400" />
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+            <BarChart3 className="h-6 w-6 text-blue-600" />
             Team Results &amp; Standings
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Official published scores and qualification decisions for <strong className="text-white">{team.team_name}</strong> ({team.registration_reference}).
+          <p className="text-slate-500 text-sm mt-1">
+            Official published scores and qualification decisions for <strong className="text-slate-900">{team.team_name}</strong> ({team.registration_reference}).
           </p>
         </div>
 
@@ -119,11 +119,11 @@ export default async function DashboardResultsPage() {
           return (
             <div
               key={round.id}
-              className="glass-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-neutral-700 transition-colors"
+              className="glass-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-slate-300 transition-colors"
             >
               <div className="flex items-start gap-4">
                 <div
-                  className="h-12 w-12 rounded-xl flex items-center justify-center font-bold text-lg text-white shrink-0"
+                  className="h-12 w-12 rounded-xl flex items-center justify-center font-bold text-lg text-slate-900 shrink-0"
                   style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                 >
                   R{round.round_number}
@@ -131,12 +131,12 @@ export default async function DashboardResultsPage() {
 
                 <div>
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <h2 className="text-base font-bold text-white">{round.name}</h2>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-neutral-700">
+                    <h2 className="text-base font-bold text-slate-900">{round.name}</h2>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-300">
                       {round.round_type.replace('_', ' ')}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                  <p className="text-xs text-slate-500 mt-1 max-w-xl">
                     {round.description}
                   </p>
                 </div>
@@ -148,7 +148,7 @@ export default async function DashboardResultsPage() {
                   <div className="flex items-center gap-6">
                     <div className="text-right">
                       <span className="text-[10px] text-slate-500 uppercase font-semibold block">Score</span>
-                      <span className="text-2xl font-black font-mono text-indigo-400">
+                      <span className="text-2xl font-black font-mono text-blue-600">
                         {Number(res.total_score).toFixed(1)}
                       </span>
                     </div>
@@ -156,7 +156,7 @@ export default async function DashboardResultsPage() {
                     {res.rank && (
                       <div className="text-right">
                         <span className="text-[10px] text-slate-500 uppercase font-semibold block">Rank</span>
-                        <span className="text-xl font-bold font-mono text-white">
+                        <span className="text-xl font-bold font-mono text-slate-900">
                           #{res.rank}
                         </span>
                       </div>
@@ -165,19 +165,19 @@ export default async function DashboardResultsPage() {
                     <div className="text-right">
                       <span className="text-[10px] text-slate-500 uppercase font-semibold block">Outcome</span>
                       {res.is_qualified ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Qualified
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-400 bg-slate-800/80 border border-neutral-700 px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 bg-slate-100/80 border border-slate-300 px-2.5 py-1 rounded-full">
                           <XCircle className="h-3.5 w-3.5" /> Did Not Advance
                         </span>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-neutral-900/60 px-3 py-2 rounded-lg border border-neutral-800">
-                    <Clock className="h-3.5 w-3.5 text-slate-400" />
+                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50/60 px-3 py-2 rounded-lg border border-slate-200">
+                    <Clock className="h-3.5 w-3.5 text-slate-500" />
                     <span>Results Pending Publication</span>
                   </div>
                 )}
@@ -188,8 +188,8 @@ export default async function DashboardResultsPage() {
       </div>
 
       {/* Info Notice */}
-      <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-950/40 text-xs text-slate-400 flex items-start gap-2.5">
-        <AlertCircle className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+      <div className="p-4 rounded-xl border border-slate-200 bg-white/40 text-xs text-slate-500 flex items-start gap-2.5">
+        <AlertCircle className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
         <p className="leading-relaxed">
           Scores are officially ratified by the jury following server-time validation and tie-breaker reconciliation. Only published round outcomes are displayed.
         </p>

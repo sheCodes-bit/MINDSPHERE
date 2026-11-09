@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { BRAND_CONFIG } from '@/config/branding'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -48,7 +49,7 @@ export function formatTimeLeft(endTime: Date): string {
 export function generateRegistrationRef(): string {
   const year = new Date().getFullYear()
   const rand = Math.floor(Math.random() * 100000).toString().padStart(5, '0')
-  return `NEX-${year}-${rand}`
+  return `${BRAND_CONFIG.registrationPrefix}-${year}-${rand}`
 }
 
 export function getTeamStatusColor(status: string): string {

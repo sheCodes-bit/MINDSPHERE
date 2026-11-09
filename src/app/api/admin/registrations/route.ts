@@ -101,7 +101,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const notificationMessages: Record<string, string> = {
-      approved: `Congratulations! Your team "${team.team_name}" has been officially approved to compete in NEXORA. Check your dashboard for round details.`,
+      approved: `Congratulations! Your team "${team.team_name}" has been officially approved to compete in COMSATS VSPARK. Check your dashboard for round details.`,
       rejected: `Your registration for team "${team.team_name}" was not accepted. Note: ${adminNotes || 'Contact the organizing committee for details.'}`,
       waitlisted: `Team "${team.team_name}" has been placed on the official waitlist. You will be notified if a primary slot opens.`,
       disqualified: `Team "${team.team_name}" has been disqualified. Note: ${adminNotes || 'Academic integrity or conduct violation.'}`,

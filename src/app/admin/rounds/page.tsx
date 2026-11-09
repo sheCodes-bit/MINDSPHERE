@@ -124,8 +124,8 @@ export default function AdminRoundsPage() {
     <div className="space-y-6 max-w-7xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Competition Rounds Setup</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-black text-slate-900">Competition Rounds Setup</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Configure round progression parameters, timer thresholds, scoring weights, and online/physical states.
           </p>
         </div>
@@ -144,27 +144,27 @@ export default function AdminRoundsPage() {
             key={r.id}
             className={`glass-card p-6 space-y-4 border transition-all ${
               r.status === 'active'
-                ? 'border-indigo-500/50 bg-indigo-950/20 shadow-glow-sm'
-                : 'border-neutral-800'
+                ? 'border-blue-200/50 bg-blue-50/20 shadow-glow-sm'
+                : 'border-slate-200'
             }`}
           >
-            <div className="flex items-start justify-between gap-3 pb-3 border-b border-neutral-800">
+            <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-200">
               <div className="flex items-center gap-3">
                 <div
-                  className="h-10 w-10 rounded-xl flex items-center justify-center font-bold text-white text-base shrink-0"
+                  className="h-10 w-10 rounded-xl flex items-center justify-center font-bold text-slate-900 text-base shrink-0"
                   style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                 >
                   {r.round_number}
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-white">{r.name}</h2>
+                  <h2 className="text-base font-bold text-slate-900">{r.name}</h2>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-slate-400 uppercase font-mono">
+                    <span className="text-[10px] text-slate-500 uppercase font-mono">
                       {r.round_type.replace('_', ' ')}
                     </span>
                     <span className="text-slate-600">•</span>
-                    <span className="text-[10px] flex items-center gap-1 text-slate-300">
-                      {r.is_online ? <Monitor className="h-3 w-3 text-blue-400" /> : <MapPin className="h-3 w-3 text-emerald-400" />}
+                    <span className="text-[10px] flex items-center gap-1 text-slate-600">
+                      {r.is_online ? <Monitor className="h-3 w-3 text-blue-600" /> : <MapPin className="h-3 w-3 text-emerald-600" />}
                       {r.is_online ? 'Online' : 'Physical'}
                     </span>
                   </div>
@@ -174,43 +174,43 @@ export default function AdminRoundsPage() {
               <span
                 className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border ${
                   r.status === 'active'
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 animate-pulse'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse'
                     : r.status === 'completed'
-                    ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                    : 'bg-neutral-800 text-slate-500 border-neutral-700'
+                    ? 'bg-blue-500/20 text-blue-700 border-blue-500/30'
+                    : 'bg-slate-100 text-slate-500 border-slate-300'
                 }`}
               >
                 {r.status}
               </span>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed min-h-[36px]">
+            <p className="text-xs text-slate-500 leading-relaxed min-h-[36px]">
               {r.description}
             </p>
 
-            <div className="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-neutral-900/60 border border-neutral-800/80 text-[11px]">
+            <div className="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-slate-50/60 border border-slate-200/80 text-[11px]">
               <div>
                 <span className="text-slate-500 block">Questions</span>
-                <span className="font-bold text-white font-mono">
+                <span className="font-bold text-slate-900 font-mono">
                   {r.questions_per_team ? `${r.questions_per_team} MCQs` : 'Open'}
                 </span>
               </div>
               <div>
                 <span className="text-slate-500 block">Timer</span>
-                <span className="font-bold text-white font-mono">
+                <span className="font-bold text-slate-900 font-mono">
                   {r.per_question_seconds ? `${r.per_question_seconds}s/q` : `${r.time_limit_seconds || 180}s`}
                 </span>
               </div>
               <div>
                 <span className="text-slate-500 block">Points</span>
-                <span className="font-bold text-emerald-400 font-mono">
+                <span className="font-bold text-emerald-600 font-mono">
                   +{r.points_correct} / -{r.points_incorrect || 0}
                 </span>
               </div>
             </div>
 
-            <div className="text-[11px] text-slate-400 bg-neutral-950/40 p-2.5 rounded-lg border border-neutral-800">
-              <strong className="text-slate-300">Qualification Target: </strong>
+            <div className="text-[11px] text-slate-500 bg-white/40 p-2.5 rounded-lg border border-slate-200">
+              <strong className="text-slate-600">Qualification Target: </strong>
               {r.round_number === 1 && 'Top 80% of teams qualify'}
               {r.round_number === 2 && 'Top 4 teams advance'}
               {r.round_number === 3 && 'Top 2 teams advance to final'}
@@ -223,14 +223,14 @@ export default function AdminRoundsPage() {
                 {r.status !== 'active' ? (
                   <button
                     onClick={() => toggleStatus(r, 'active')}
-                    className="text-xs font-bold text-emerald-400 hover:text-emerald-300 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20"
+                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700 px-2.5 py-1 rounded bg-emerald-50 border border-emerald-200"
                   >
                     Activate
                   </button>
                 ) : (
                   <button
                     onClick={() => toggleStatus(r, 'completed')}
-                    className="text-xs font-bold text-blue-400 hover:text-blue-300 px-2.5 py-1 rounded bg-blue-500/10 border border-blue-500/20"
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 px-2.5 py-1 rounded bg-blue-50 border border-blue-200"
                   >
                     Mark Done
                   </button>
@@ -238,7 +238,7 @@ export default function AdminRoundsPage() {
                 {r.status !== 'draft' && (
                   <button
                     onClick={() => toggleStatus(r, 'draft')}
-                    className="text-xs text-slate-400 hover:text-white px-2 py-1 rounded"
+                    className="text-xs text-slate-500 hover:text-slate-900 px-2 py-1 rounded"
                   >
                     Revert to Draft
                   </button>
@@ -259,14 +259,14 @@ export default function AdminRoundsPage() {
       {/* Edit Round Modal */}
       {editingRound && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-xl w-full p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto border-neutral-700">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <h2 className="text-lg font-bold text-white">
+          <div className="glass-card max-w-xl w-full p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto border-slate-300">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900">
                 Edit Round {editingRound.round_number} Parameters
               </h2>
               <button
                 onClick={() => setEditingRound(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-500 hover:text-slate-900"
               >
                 ✕
               </button>
@@ -274,7 +274,7 @@ export default function AdminRoundsPage() {
 
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Round Name</label>
+                <label className="block font-semibold text-slate-600 mb-1">Round Name</label>
                 <input
                   type="text"
                   required
@@ -285,7 +285,7 @@ export default function AdminRoundsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Description</label>
+                <label className="block font-semibold text-slate-600 mb-1">Description</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -295,11 +295,11 @@ export default function AdminRoundsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Status</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Status</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="form-input text-xs w-full bg-neutral-900"
+                    className="form-input text-xs w-full bg-slate-50"
                   >
                     <option value="draft">Draft</option>
                     <option value="active">Active (Live)</option>
@@ -309,7 +309,7 @@ export default function AdminRoundsPage() {
                 </div>
 
                 <div className="flex items-center pt-5">
-                  <label className="flex items-center gap-2 cursor-pointer text-slate-300 font-medium">
+                  <label className="flex items-center gap-2 cursor-pointer text-slate-600 font-medium">
                     <input
                       type="checkbox"
                       checked={isOnline}
@@ -323,7 +323,7 @@ export default function AdminRoundsPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Questions/Team</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Questions/Team</label>
                   <input
                     type="number"
                     value={questionsPerTeam || ''}
@@ -334,7 +334,7 @@ export default function AdminRoundsPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Secs / Question</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Secs / Question</label>
                   <input
                     type="number"
                     value={perQuestionSeconds || ''}
@@ -345,7 +345,7 @@ export default function AdminRoundsPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Total Time Limit (s)</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Total Time Limit (s)</label>
                   <input
                     type="number"
                     value={timeLimitSeconds || ''}
@@ -358,7 +358,7 @@ export default function AdminRoundsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Points Correct</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Points Correct</label>
                   <input
                     type="number"
                     step="0.1"
@@ -369,7 +369,7 @@ export default function AdminRoundsPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Points Incorrect (Deduction)</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Points Incorrect (Deduction)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -380,7 +380,7 @@ export default function AdminRoundsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setEditingRound(null)}

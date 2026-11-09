@@ -241,7 +241,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'nexora_question_import_sample.csv'
+    a.download = 'vspark_question_import_sample.csv'
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -251,8 +251,8 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Question Bank</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-black text-slate-900">Question Bank</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Author and snapshot MCQs across the 7 official subjects, import batches, and manage question versions.
           </p>
         </div>
@@ -286,7 +286,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
       <div className="glass-card p-4 space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div className="relative">
-            <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
               placeholder="Search question text..."
@@ -301,7 +301,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="form-input text-xs py-2 w-full bg-neutral-900"
+              className="form-input text-xs py-2 w-full bg-slate-50"
             >
               <option value="all">All Subjects</option>
               {subjects.map((s) => (
@@ -316,7 +316,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
             <select
               value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="form-input text-xs py-2 w-full bg-neutral-900"
+              className="form-input text-xs py-2 w-full bg-slate-50"
             >
               <option value="all">All Difficulties</option>
               <option value="easy">Easy</option>
@@ -329,7 +329,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="form-input text-xs py-2 w-full bg-neutral-900"
+              className="form-input text-xs py-2 w-full bg-slate-50"
             >
               <option value="published">Published</option>
               <option value="archived">Archived</option>
@@ -342,8 +342,8 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
       {/* Questions Table */}
       <div className="glass-card overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-indigo-400" />
+          <div className="p-12 text-center text-slate-500 text-sm">
+            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
             Loading questions...
           </div>
         ) : questions.length === 0 ? (
@@ -355,7 +355,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-neutral-800 text-slate-400 bg-neutral-950/60 font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-slate-200 text-slate-500 bg-white/60 font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Subject</th>
                   <th className="py-3 px-4">Question</th>
                   <th className="py-3 px-4">Difficulty</th>
@@ -370,14 +370,14 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                   const correctOpt = opts.find((o: any) => o.is_correct)
 
                   return (
-                    <tr key={q.id} className="hover:bg-neutral-900/40 transition-colors">
-                      <td className="py-3 px-4 text-indigo-300 font-semibold whitespace-nowrap">
+                    <tr key={q.id} className="hover:bg-slate-50/40 transition-colors">
+                      <td className="py-3 px-4 text-blue-600 font-semibold whitespace-nowrap">
                         {q.subjects?.name || '—'}
                       </td>
                       <td className="py-3 px-4 max-w-md">
-                        <p className="font-medium text-white line-clamp-2">{q.question_text}</p>
+                        <p className="font-medium text-slate-900 line-clamp-2">{q.question_text}</p>
                         {correctOpt && (
-                          <span className="text-[11px] text-emerald-400/90 font-mono mt-0.5 block">
+                          <span className="text-[11px] text-emerald-600/90 font-mono mt-0.5 block">
                             ✓ {correctOpt.option_text}
                           </span>
                         )}
@@ -385,15 +385,15 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                       <td className="py-3 px-4">
                         <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                           q.difficulty === 'easy'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : q.difficulty === 'hard'
-                            ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            ? 'bg-red-50 text-red-700 border border-red-200'
+                            : 'bg-amber-100 text-amber-600 border border-amber-200'
                         }`}>
                           {q.difficulty}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-slate-400 font-mono">
+                      <td className="py-3 px-4 text-slate-500 font-mono">
                         {opts.length} options
                       </td>
                       <td className="py-3 px-4 text-slate-500 font-mono">
@@ -403,21 +403,21 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => setPreviewQuestion(q)}
-                            className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-300 hover:text-white"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900"
                             title="Preview question"
                           >
                             <Eye className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() => handleOpenEdit(q)}
-                            className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-300 hover:text-white"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900"
                             title="Edit question"
                           >
                             <Edit2 className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() => handleArchiveToggle(q.id, q.status)}
-                            className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-400 hover:text-amber-400"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-amber-600"
                             title={q.status === 'archived' ? 'Restore' : 'Archive'}
                           >
                             <Archive className="h-3.5 w-3.5" />
@@ -436,14 +436,14 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
       {/* Authoring & Edit Modal */}
       {isFormOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-2xl w-full p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto border-neutral-700">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <h2 className="text-lg font-bold text-white">
+          <div className="glass-card max-w-2xl w-full p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto border-slate-300">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900">
                 {editingId ? 'Edit MCQ Question' : 'Author New MCQ Question'}
               </h2>
               <button
                 onClick={() => setIsFormOpen(false)}
-                className="text-slate-400 hover:text-white text-base p-1"
+                className="text-slate-500 hover:text-slate-900 text-base p-1"
               >
                 ✕
               </button>
@@ -452,11 +452,11 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
             <form onSubmit={handleSaveQuestion} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Subject</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Subject</label>
                   <select
                     value={subjectId}
                     onChange={(e) => setSubjectId(e.target.value)}
-                    className="form-input text-xs w-full bg-neutral-900"
+                    className="form-input text-xs w-full bg-slate-50"
                     required
                   >
                     {subjects.map((s) => (
@@ -468,11 +468,11 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Difficulty</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Difficulty</label>
                   <select
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value as any)}
-                    className="form-input text-xs w-full bg-neutral-900"
+                    className="form-input text-xs w-full bg-slate-50"
                   >
                     <option value="easy">Easy (+1 pt)</option>
                     <option value="medium">Medium (+1 pt)</option>
@@ -482,7 +482,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-600 mb-1">
                   Question Text (Minimum 5 characters)
                 </label>
                 <textarea
@@ -496,7 +496,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
 
               {/* Options */}
               <div className="space-y-2">
-                <label className="block font-semibold text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-600 mb-1">
                   Answer Options (Select the single correct answer radio button)
                 </label>
                 {options.map((opt, i) => (
@@ -518,14 +518,14 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                       value={opt.text}
                       onChange={(e) => handleOptionChange(i, e.target.value)}
                       placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                      className={`form-input text-xs flex-1 ${opt.isCorrect ? 'border-indigo-500/60 bg-indigo-950/20' : ''}`}
+                      className={`form-input text-xs flex-1 ${opt.isCorrect ? 'border-blue-200/60 bg-blue-50/20' : ''}`}
                     />
                   </div>
                 ))}
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-600 mb-1">
                   Explanation / Solution Walkthrough
                 </label>
                 <textarea
@@ -536,7 +536,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(false)}
@@ -560,21 +560,21 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
       {/* Preview Modal */}
       {previewQuestion && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-lg w-full p-6 space-y-5 border-neutral-700">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <span className="text-xs uppercase font-bold text-indigo-400">
+          <div className="glass-card max-w-lg w-full p-6 space-y-5 border-slate-300">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <span className="text-xs uppercase font-bold text-blue-600">
                 {previewQuestion.subjects?.name} • {previewQuestion.difficulty}
               </span>
               <button
                 onClick={() => setPreviewQuestion(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-500 hover:text-slate-900"
               >
                 ✕
               </button>
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-white leading-relaxed">
+              <p className="text-sm font-semibold text-slate-900 leading-relaxed">
                 {previewQuestion.question_text}
               </p>
             </div>
@@ -585,20 +585,20 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                   key={o.id}
                   className={`p-3 rounded-lg border text-xs flex items-center gap-3 ${
                     o.is_correct
-                      ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-200'
-                      : 'border-neutral-800 bg-neutral-900/50 text-slate-300'
+                      ? 'border-emerald-500/50 bg-emerald-50 text-emerald-200'
+                      : 'border-slate-200 bg-slate-50/50 text-slate-600'
                   }`}
                 >
                   <span className="font-mono font-bold w-4">{String.fromCharCode(65 + idx)}</span>
                   <span className="flex-1">{o.option_text}</span>
-                  {o.is_correct && <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />}
+                  {o.is_correct && <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />}
                 </div>
               ))}
             </div>
 
             {previewQuestion.explanation && (
-              <div className="p-3 rounded-lg bg-neutral-900/80 border border-neutral-800 text-xs text-slate-400">
-                <strong className="block text-slate-200 mb-1">Explanation:</strong>
+              <div className="p-3 rounded-lg bg-slate-50/80 border border-slate-200 text-xs text-slate-500">
+                <strong className="block text-slate-700 mb-1">Explanation:</strong>
                 {previewQuestion.explanation}
               </div>
             )}
@@ -618,10 +618,10 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
       {/* Batch Import Modal */}
       {isImportOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-2xl w-full p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto border-neutral-700">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Upload className="h-5 w-5 text-indigo-400" />
+          <div className="glass-card max-w-2xl w-full p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto border-slate-300">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Upload className="h-5 w-5 text-blue-600" />
                 Import Questions (CSV / JSON)
               </h2>
               <button
@@ -629,13 +629,13 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                   setIsImportOpen(false)
                   setImportReport(null)
                 }}
-                className="text-slate-400 hover:text-white text-base p-1"
+                className="text-slate-500 hover:text-slate-900 text-base p-1"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               Paste valid CSV rows with headers <code>Subject, Question, Difficulty, Option A, Option B, Option C, Option D, Correct Option, Explanation</code> or JSON array.
             </p>
 
@@ -643,7 +643,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
               <button
                 type="button"
                 onClick={downloadSampleCSV}
-                className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 underline"
+                className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-600 underline"
               >
                 <FileText className="h-3.5 w-3.5" /> Download CSV Template
               </button>
@@ -659,13 +659,13 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
               />
 
               {importReport && (
-                <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 text-xs space-y-2">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
                   <div className="flex items-center justify-between font-bold">
-                    <span className="text-emerald-400">Successfully Imported: {importReport.successCount}</span>
-                    <span className="text-amber-400">Skipped Duplicates: {importReport.skippedDuplicates}</span>
+                    <span className="text-emerald-600">Successfully Imported: {importReport.successCount}</span>
+                    <span className="text-amber-600">Skipped Duplicates: {importReport.skippedDuplicates}</span>
                   </div>
                   {importReport.errors?.length > 0 && (
-                    <div className="text-red-400 space-y-1 pt-2 border-t border-neutral-800">
+                    <div className="text-red-600 space-y-1 pt-2 border-t border-slate-200">
                       <span className="font-bold">Errors ({importReport.errors.length}):</span>
                       <ul className="list-disc pl-4 space-y-0.5">
                         {importReport.errors.slice(0, 5).map((err: string, i: number) => (
@@ -677,7 +677,7 @@ Data Structures & Algorithms,"Which data structure uses LIFO ordering?",easy,"Qu
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => {

@@ -128,7 +128,7 @@ export default function AdminRegistrationsPage() {
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement('a')
     link.setAttribute('href', encodedUri)
-    link.setAttribute('download', `nexora_registrations_${new Date().toISOString().slice(0, 10)}.csv`)
+    link.setAttribute('download', `vspark_registrations_${new Date().toISOString().slice(0, 10)}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -140,8 +140,8 @@ export default function AdminRegistrationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Registration Management</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-black text-slate-900">Registration Management</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Review applicant teams, evaluate eligibility, record official decisions, and export rosters.
           </p>
         </div>
@@ -175,7 +175,7 @@ export default function AdminRegistrationsPage() {
           }}
           className="relative w-full sm:w-80"
         >
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="Search team, institution, ref..."
@@ -193,8 +193,8 @@ export default function AdminRegistrationsPage() {
               onClick={() => setStatusFilter(st)}
               className={`text-xs px-3 py-1.5 rounded-lg border transition-colors shrink-0 capitalize ${
                 statusFilter === st
-                  ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50 font-bold'
-                  : 'bg-neutral-900 text-slate-400 border-neutral-800 hover:text-white'
+                  ? 'bg-blue-600/30 text-blue-600 border-blue-200/50 font-bold'
+                  : 'bg-slate-50 text-slate-500 border-slate-200 hover:text-slate-900'
               }`}
             >
               {st.replace('_', ' ')}
@@ -206,8 +206,8 @@ export default function AdminRegistrationsPage() {
       {/* Registrations Table */}
       <div className="glass-card overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-indigo-400" />
+          <div className="p-12 text-center text-slate-500 text-sm">
+            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
             Loading registrations...
           </div>
         ) : teams.length === 0 ? (
@@ -219,7 +219,7 @@ export default function AdminRegistrationsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-neutral-800 text-slate-400 bg-neutral-950/60 font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-slate-200 text-slate-500 bg-white/60 font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Reference</th>
                   <th className="py-3 px-4">Team Name</th>
                   <th className="py-3 px-4">Institution</th>
@@ -232,18 +232,18 @@ export default function AdminRegistrationsPage() {
               </thead>
               <tbody className="divide-y divide-neutral-800/60">
                 {teams.map((t) => (
-                  <tr key={t.id} className="hover:bg-neutral-900/40 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-300">
+                  <tr key={t.id} className="hover:bg-slate-50/40 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-blue-600">
                       {t.registration_reference}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-white">
+                    <td className="py-3 px-4 font-semibold text-slate-900">
                       {t.team_name}
                     </td>
-                    <td className="py-3 px-4 text-slate-300 truncate max-w-[160px]">
+                    <td className="py-3 px-4 text-slate-600 truncate max-w-[160px]">
                       {t.institution_name}
                     </td>
-                    <td className="py-3 px-4 text-slate-400">{t.region || '—'}</td>
-                    <td className="py-3 px-4 text-slate-300 font-medium">
+                    <td className="py-3 px-4 text-slate-500">{t.region || '—'}</td>
+                    <td className="py-3 px-4 text-slate-600 font-medium">
                       {t.team_members?.length ?? 0} students
                     </td>
                     <td className="py-3 px-4">
@@ -260,7 +260,7 @@ export default function AdminRegistrationsPage() {
                           setSelectedTeam(t)
                           setAdminNotes(t.admin_notes || '')
                         }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-300 hover:text-white transition-colors text-[11px] font-semibold"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors text-[11px] font-semibold"
                       >
                         <Eye className="h-3 w-3" /> Review
                       </button>
@@ -276,17 +276,17 @@ export default function AdminRegistrationsPage() {
       {/* Review & Adjudication Modal */}
       {selectedTeam && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-2xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto border-neutral-700">
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
+          <div className="glass-card max-w-2xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto border-slate-300">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <div>
-                <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase block">
+                <span className="text-[10px] font-mono text-blue-600 font-bold uppercase block">
                   {selectedTeam.registration_reference}
                 </span>
-                <h2 className="text-xl font-bold text-white">{selectedTeam.team_name}</h2>
+                <h2 className="text-xl font-bold text-slate-900">{selectedTeam.team_name}</h2>
               </div>
               <button
                 onClick={() => setSelectedTeam(null)}
-                className="text-slate-400 hover:text-white text-lg p-1"
+                className="text-slate-500 hover:text-slate-900 text-lg p-1"
               >
                 ✕
               </button>
@@ -294,38 +294,38 @@ export default function AdminRegistrationsPage() {
 
             {/* University & Contact Details */}
             <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="p-3 rounded-lg bg-neutral-900/60 border border-neutral-800">
+              <div className="p-3 rounded-lg bg-slate-50/60 border border-slate-200">
                 <span className="text-slate-500 block">Institution</span>
-                <span className="font-semibold text-white">{selectedTeam.institution_name}</span>
-                <span className="text-slate-400 block mt-0.5">{selectedTeam.campus || 'Main Campus'}</span>
+                <span className="font-semibold text-slate-900">{selectedTeam.institution_name}</span>
+                <span className="text-slate-500 block mt-0.5">{selectedTeam.campus || 'Main Campus'}</span>
               </div>
-              <div className="p-3 rounded-lg bg-neutral-900/60 border border-neutral-800">
+              <div className="p-3 rounded-lg bg-slate-50/60 border border-slate-200">
                 <span className="text-slate-500 block">Contact Information</span>
-                <span className="font-semibold text-white">{selectedTeam.contact_email}</span>
-                <span className="text-slate-400 block mt-0.5">{selectedTeam.contact_phone || 'No phone provided'}</span>
+                <span className="font-semibold text-slate-900">{selectedTeam.contact_email}</span>
+                <span className="text-slate-500 block mt-0.5">{selectedTeam.contact_phone || 'No phone provided'}</span>
               </div>
             </div>
 
             {/* Members Roster */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
                 Team Roster ({selectedTeam.team_members?.length ?? 0} Students)
               </h3>
               <div className="space-y-2">
                 {(selectedTeam.team_members || []).map((m: any, idx: number) => (
-                  <div key={m.id || idx} className="p-3 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center justify-between text-xs">
+                  <div key={m.id || idx} className="p-3 rounded-lg bg-white/80 border border-slate-200 flex items-center justify-between text-xs">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-white">{m.full_name}</span>
+                        <span className="font-bold text-slate-900">{m.full_name}</span>
                         {m.is_captain && (
-                          <span className="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-bold">
+                          <span className="text-[9px] bg-blue-100/20 text-blue-600 px-1.5 py-0.2 rounded font-bold">
                             CAPTAIN
                           </span>
                         )}
                       </div>
                       <span className="text-slate-500 font-mono">ID: {m.student_id}</span>
                     </div>
-                    <div className="text-right text-slate-400">
+                    <div className="text-right text-slate-500">
                       <span>{m.degree_program || 'Student'}</span>
                       <span className="text-slate-600 block text-[10px]">{m.semester ? `Semester ${m.semester}` : ''}</span>
                     </div>
@@ -336,7 +336,7 @@ export default function AdminRegistrationsPage() {
 
             {/* Admin Notes Field */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Committee Notes / Rejection Reason / Waitlist Remarks:
               </label>
               <textarea
@@ -348,7 +348,7 @@ export default function AdminRegistrationsPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-neutral-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setSelectedTeam(null)}
@@ -362,7 +362,7 @@ export default function AdminRegistrationsPage() {
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleStatusChange(selectedTeam.id, 'waitlisted')}
-                  className="px-3.5 py-2 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-bold transition-colors"
+                  className="px-3.5 py-2 rounded-lg bg-amber-100 text-amber-600 hover:bg-amber-200 border border-amber-500/40 text-xs font-bold transition-colors"
                 >
                   Waitlist
                 </button>
@@ -371,7 +371,7 @@ export default function AdminRegistrationsPage() {
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleStatusChange(selectedTeam.id, 'rejected')}
-                  className="px-3.5 py-2 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/40 text-xs font-bold transition-colors"
+                  className="px-3.5 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-500/30 border border-red-200 text-xs font-bold transition-colors"
                 >
                   Reject
                 </button>

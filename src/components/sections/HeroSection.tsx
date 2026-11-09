@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { ChevronRight, Users, Calendar, Trophy, Sparkles } from 'lucide-react'
+import Image from 'next/image'
+import { ChevronRight, Users, Calendar, Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { BRAND_CONFIG } from '@/config/branding'
 
@@ -32,16 +33,16 @@ function Countdown({ targetDate }: { targetDate: string }) {
   if (time.expired) return null
 
   return (
-    <div className="flex items-center justify-center gap-3 sm:gap-4 mt-8">
+    <div className="flex items-center justify-center gap-3 sm:gap-4 mt-9 animate-fade-up anim-delay-400">
       {[
         { value: time.days, label: 'Days' },
         { value: time.hours, label: 'Hours' },
         { value: time.minutes, label: 'Minutes' },
         { value: time.seconds, label: 'Seconds' },
       ].map(({ value, label }) => (
-        <div key={label} className="glass-card px-3 sm:px-4 py-3 text-center min-w-[64px] sm:min-w-[76px]">
-          <div className="text-xl sm:text-2xl font-bold text-white font-mono tabular-nums">{String(value).padStart(2, '0')}</div>
-          <div className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider mt-0.5">{label}</div>
+        <div key={label} className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-3 sm:px-5 py-3 text-center min-w-[64px] sm:min-w-[80px] shadow-lg shadow-black/20">
+          <div className="text-2xl sm:text-3xl font-extrabold text-white font-display tabular-nums leading-none">{String(value).padStart(2, '0')}</div>
+          <div className="text-[10px] sm:text-xs text-blue-100/80 uppercase tracking-widest mt-1.5">{label}</div>
         </div>
       ))}
     </div>
@@ -55,67 +56,78 @@ export function HeroSection({ settings }: HeroSectionProps) {
   const maxTeams = settings['max_teams']
   const venue = settings['event_venue']
 
+  const dateLabel = eventDate
+    ? new Date(eventDate).toLocaleDateString('en-US', { timeZone: 'Asia/Karachi', month: 'long', day: 'numeric', year: 'numeric' })
+    : null
+
   return (
     <section
       id="home"
-      className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-4 py-20 sm:py-28 overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center px-6 pt-32 pb-24 text-center overflow-hidden"
       aria-label="Hero section"
     >
-      {/* Ambient decorative glow */}
-      <div className="ambient-glow" aria-hidden />
-      <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-indigo-600/10 blur-[130px] rounded-full pointer-events-none" aria-hidden />
-      <div className="absolute bottom-10 right-0 w-[500px] h-[400px] bg-purple-600/10 blur-[130px] rounded-full pointer-events-none" aria-hidden />
+      <div className="absolute inset-0 z-0 animate-slow-zoom" aria-hidden>
+        <Image
+          src="/images/hero-slider.jpg"
+          alt="COMSATS University Islamabad campus"
+          fill
+          priority
+          sizes="100vw"
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="absolute inset-0 bg-black/60 z-10" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-[#f8fafc] z-[15]" aria-hidden />
 
-      <div className="relative z-10 max-w-4xl mx-auto">
-        {/* Top badge */}
-        <div className="flex justify-center mb-6">
-          <span className="badge-accent shadow-glow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-400" aria-hidden />
-            {BRAND_CONFIG.subtitle}
+      <div className="relative z-20 max-w-4xl mx-auto">
+        <p className="text-blue-200/90 text-xs sm:text-sm font-bold uppercase tracking-[0.3em] mb-5 animate-fade-up">
+          {BRAND_CONFIG.university}
+        </p>
+
+        <h1 className="font-display font-black text-6xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tighter text-white leading-none drop-shadow-2xl animate-fade-up anim-delay-100">
+          <span className="text-primary-500">V</span>SPARK
+        </h1>
+
+        <p className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-[0.15em] uppercase mt-3 animate-fade-up anim-delay-200">
+          Quiz Competition
+        </p>
+
+        <div className="flex justify-center mt-7 animate-fade-up anim-delay-200">
+          <span className="inline-block px-5 py-2.5 bg-primary-600/20 backdrop-blur-md border border-primary-400/30 text-primary-200 rounded-full text-[10px] md:text-sm font-bold tracking-widest uppercase shadow-lg shadow-black/20">
+            {dateLabel ? `${dateLabel} • ` : ''}{BRAND_CONFIG.university}, {BRAND_CONFIG.campus}
           </span>
         </div>
 
-        {/* Main heading */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none mb-4">
-          <span className="text-white">NEX</span>
-          <span className="gradient-text">ORA</span>
-        </h1>
-
-        {/* Tagline */}
-        <p className="text-lg sm:text-xl md:text-2xl font-medium text-indigo-300 mt-2 tracking-wide font-sans">
-          &ldquo;{BRAND_CONFIG.tagline}&rdquo;
+        <p className="text-lg sm:text-xl md:text-2xl text-slate-100 font-medium max-w-2xl mx-auto mt-8 leading-relaxed animate-fade-up anim-delay-300">
+          A national-level computer science quiz competition.
+        </p>
+        <p className="text-base sm:text-lg text-blue-200 font-medium max-w-2xl mx-auto mt-2 leading-relaxed animate-fade-up anim-delay-300">
+          Seven core subjects, four elimination rounds, one champion team.
         </p>
 
-        {/* Subheading description */}
-        <p className="text-sm sm:text-base md:text-lg text-slate-400 max-w-2xl mx-auto mt-5 leading-relaxed">
-          {BRAND_CONFIG.shortDescription}
-        </p>
-
-        {/* Meta badges: Teams, Venue, Deadline */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-6 text-xs sm:text-sm text-slate-400">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-6 text-xs sm:text-sm text-slate-300 animate-fade-up anim-delay-300">
           <div className="flex items-center gap-1.5">
-            <Users className="h-4 w-4 text-indigo-400" aria-hidden />
-            <span>Teams of <strong className="text-white font-medium">2–3 Students</strong></span>
+            <Users className="h-4 w-4 text-blue-300" aria-hidden />
+            <span>Teams of <strong className="text-white font-semibold">2–3 Students</strong></span>
           </div>
           {maxTeams && (
             <div className="flex items-center gap-1.5">
-              <Trophy className="h-4 w-4 text-purple-400" aria-hidden />
-              <span>Capacity: <strong className="text-white font-medium">{maxTeams} Teams</strong></span>
+              <Trophy className="h-4 w-4 text-blue-300" aria-hidden />
+              <span>Capacity: <strong className="text-white font-semibold">{maxTeams} Teams</strong></span>
             </div>
           )}
           {venue && (
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-600">•</span>
-              <span className="text-slate-300">{venue}</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-slate-200">{venue}</span>
             </div>
           )}
         </div>
 
-        {/* Registration deadline banner */}
         {regCloseAt && regStatus === 'open' && (
-          <div className="flex items-center justify-center gap-2 mt-4 text-xs sm:text-sm">
-            <Calendar className="h-4 w-4 text-indigo-400" aria-hidden />
-            <span className="text-slate-400">
+          <div className="flex items-center justify-center gap-2 mt-4 text-xs sm:text-sm animate-fade-up anim-delay-300">
+            <Calendar className="h-4 w-4 text-blue-300" aria-hidden />
+            <span className="text-slate-300">
               Registration closes:{' '}
               <strong className="text-white">
                 {new Date(regCloseAt).toLocaleDateString('en-PK', { timeZone: 'Asia/Karachi', dateStyle: 'long' })}
@@ -124,14 +136,12 @@ export function HeroSection({ settings }: HeroSectionProps) {
           </div>
         )}
 
-        {/* Countdown */}
         {eventDate && <Countdown targetDate={eventDate} />}
 
-        {/* Call to action buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 animate-fade-up anim-delay-500">
           {regStatus === 'open' ? (
             <Link href="/register" className="btn-primary text-base px-8 py-3.5 shadow-glow-md">
-              Register Your Team
+              Register Now
               <ChevronRight className="h-4 w-4 ml-1" aria-hidden />
             </Link>
           ) : (
@@ -140,8 +150,11 @@ export function HeroSection({ settings }: HeroSectionProps) {
               <ChevronRight className="h-4 w-4 ml-1" aria-hidden />
             </Link>
           )}
-          <Link href="/#rounds" className="btn-ghost text-base px-7 py-3.5">
-            Explore 4 Competition Rounds
+          <Link
+            href="/#rounds"
+            className="inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-base font-semibold text-white border border-white/40 bg-white/5 backdrop-blur-sm hover:bg-white/15 transition-all duration-200"
+          >
+            Explore Competition Rounds
           </Link>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { BRAND_CONFIG } from '@/config/branding'
 const FAQ_ITEMS = [
   {
     question: `Who can participate in ${BRAND_CONFIG.name}?`,
-    answer: `${BRAND_CONFIG.name} is open to currently enrolled regional university students. All participants must present a valid student ID card at the venue. Specific eligibility criteria (e.g., year of study, program requirements) are determined by the organizers and published in the rules.`,
+    answer: `${BRAND_CONFIG.name} is open to currently enrolled university students. All participants must present a valid student ID card at the venue. Specific eligibility criteria (e.g., year of study, program requirements) are determined by the organizers and published in the rules.`,
   },
   {
     question: 'How many members can a team have?',
@@ -32,7 +32,7 @@ const FAQ_ITEMS = [
   },
   {
     question: 'How will registration be confirmed?',
-    answer: `Upon submission, your team receives a unique registration reference formatted as NEX-YYYY-XXXXX. The organizing committee reviews all applications and posts live status updates (Approved, Waitlisted, Rejected) on your participant dashboard.`,
+    answer: `Upon submission, your team receives a unique registration reference formatted as ${BRAND_CONFIG.registrationPrefix}-YYYY-XXXXX. The organizing committee reviews all applications and posts live status updates (Approved, Waitlisted, Rejected) on your participant dashboard.`,
   },
   {
     question: 'What happens if two teams are tied at a qualification cutoff?',
@@ -47,24 +47,24 @@ const FAQ_ITEMS = [
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border border-neutral-800/80 rounded-xl overflow-hidden bg-neutral-900/30">
+    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-neutral-800/40 transition-colors"
+        className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-blue-50/50 transition-colors"
         aria-expanded={open}
       >
-        <span className="text-sm font-semibold text-white">{question}</span>
+        <span className="text-sm font-semibold text-slate-900">{question}</span>
         <ChevronDown
           className={cn(
             'h-4 w-4 text-slate-400 shrink-0 transition-transform duration-200',
-            open && 'rotate-180 text-indigo-400'
+            open && 'rotate-180 text-blue-600'
           )}
           aria-hidden
         />
       </button>
       {open && (
-        <div className="px-6 pb-4 text-sm text-slate-400 leading-relaxed border-t border-neutral-800/50 pt-3">
+        <div className="px-6 pb-4 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
           {answer}
         </div>
       )}
@@ -74,7 +74,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 export function FAQSection() {
   return (
-    <section id="faq" className="relative py-24 px-4">
+    <section id="faq" className="relative py-24 px-4 scroll-mt-24">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
           <span className="badge-accent mb-4 inline-flex">Got Questions?</span>

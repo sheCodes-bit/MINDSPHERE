@@ -1,7 +1,7 @@
 {
-  "name": "nexora",
+  "name": "comsats-vspark",
   "version": "1.0.0",
-  "description": "NEXORA — The Regional Computing Challenge Platform",
+  "description": "COMSATS VSPARK Quiz Competition Platform",
   "private": true,
   "scripts": {
     "clean": "node -e \"try { fs.rmSync('.next', { recursive: true, force: true }); } catch {}\"",

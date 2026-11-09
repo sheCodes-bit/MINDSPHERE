@@ -7,7 +7,7 @@ import {
   announcementSchema,
 } from '@/lib/validations/schemas'
 
-describe('NEXORA Zod Validation Schemas', () => {
+describe('COMSATS VSPARK Zod Validation Schemas', () => {
   describe('signUpSchema', () => {
     it('accepts valid credentials with strong password', () => {
       const valid = {

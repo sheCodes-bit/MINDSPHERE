@@ -43,7 +43,7 @@ export function DashboardSidebarNav() {
             className={cn('sidebar-link', isActive && 'active')}
             aria-current={isActive ? 'page' : undefined}
           >
-            <Icon className={cn('h-4 w-4', isActive ? 'text-indigo-400' : '')} aria-hidden />
+            <Icon className={cn('h-4 w-4', isActive ? 'text-blue-600' : '')} aria-hidden />
             {label}
           </Link>
         )

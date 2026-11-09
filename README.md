@@ -1,8 +1,8 @@
-# NEXORA — The Regional Computing Challenge
+# COMSATS VSPARK — Quiz Competition
 
 > **"Challenge your knowledge. Prove your intelligence."**
 
-NEXORA is a full-stack web platform for managing a regional university-level computing competition. It supports team registration, four-round competition management (MCQ → Rapid Fire → Buzzer Final), live adjudication, automated scoring, results publication, and a complete admin console.
+COMSATS VSPARK is a full-stack web platform for managing a regional university-level computing competition. It supports team registration, four-round competition management (MCQ → Rapid Fire → Buzzer Final), live adjudication, automated scoring, results publication, and a complete admin console.
 
 ---
 
@@ -111,7 +111,7 @@ supabase/migrations/002_rls_policies.sql
 -- 3. Seed data (subjects, rounds, competition settings)
 supabase/migrations/003_seed_data.sql
 
--- 4. NEXORA rebranding (updates registration ref format + settings)
+-- 4. COMSATS VSPARK rebranding (updates registration ref format + settings)
 supabase/migrations/004_nexora_rebranding.sql
 
 -- 5. Security fixes (additive — notification policy, non-captain member access)
@@ -224,4 +224,4 @@ Test files live in `test/`:
 
 ---
 
-© 2025 NEXORA — The Regional Computing Challenge. All rights reserved.
+© 2025 COMSATS VSPARK — Quiz Competition. All rights reserved.

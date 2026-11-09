@@ -101,8 +101,8 @@ export default function AdminSubjectsPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Competition Subjects</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-black text-slate-900">Competition Subjects</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Manage the 7 official computer science competition subjects and syllabus descriptions.
           </p>
         </div>
@@ -125,15 +125,15 @@ export default function AdminSubjectsPage() {
 
       <div className="glass-card overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-indigo-400" />
+          <div className="p-12 text-center text-slate-500 text-sm">
+            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
             Loading subjects...
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-neutral-800 text-slate-400 bg-neutral-950/60 font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-slate-200 text-slate-500 bg-white/60 font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4 w-12">#</th>
                   <th className="py-3 px-4">Subject Name</th>
                   <th className="py-3 px-4">Syllabus Scope</th>
@@ -143,14 +143,14 @@ export default function AdminSubjectsPage() {
               </thead>
               <tbody className="divide-y divide-neutral-800/60">
                 {subjects.map((s) => (
-                  <tr key={s.id} className="hover:bg-neutral-900/40 transition-colors">
+                  <tr key={s.id} className="hover:bg-slate-50/40 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-slate-500">
                       {s.display_order}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-white">
+                    <td className="py-3 px-4 font-semibold text-slate-900">
                       {s.name}
                     </td>
-                    <td className="py-3 px-4 text-slate-300 max-w-md">
+                    <td className="py-3 px-4 text-slate-600 max-w-md">
                       {s.description || '—'}
                     </td>
                     <td className="py-3 px-4">
@@ -158,8 +158,8 @@ export default function AdminSubjectsPage() {
                         onClick={() => toggleActive(s)}
                         className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border transition-colors ${
                           s.is_active
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                            : 'bg-neutral-800 text-slate-500 border-neutral-700'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-100 text-slate-500 border-slate-300'
                         }`}
                       >
                         {s.is_active ? 'Active' : 'Inactive'}
@@ -168,7 +168,7 @@ export default function AdminSubjectsPage() {
                     <td className="py-3 px-4 text-right">
                       <button
                         onClick={() => openEdit(s)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-300 hover:text-white transition-colors text-[11px]"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors text-[11px]"
                       >
                         <Edit2 className="h-3 w-3" /> Edit
                       </button>
@@ -184,14 +184,14 @@ export default function AdminSubjectsPage() {
       {/* Edit/Create Modal */}
       {editingSubject && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-lg w-full p-6 space-y-5 border-neutral-700">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <h2 className="text-lg font-bold text-white">
+          <div className="glass-card max-w-lg w-full p-6 space-y-5 border-slate-300">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900">
                 {editingSubject.id ? 'Edit Subject' : 'Add Subject'}
               </h2>
               <button
                 onClick={() => setEditingSubject(null)}
-                className="text-slate-400 hover:text-white text-base p-1"
+                className="text-slate-500 hover:text-slate-900 text-base p-1"
               >
                 ✕
               </button>
@@ -199,7 +199,7 @@ export default function AdminSubjectsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Subject Name</label>
+                <label className="block font-semibold text-slate-600 mb-1">Subject Name</label>
                 <input
                   type="text"
                   required
@@ -211,7 +211,7 @@ export default function AdminSubjectsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Syllabus Description</label>
+                <label className="block font-semibold text-slate-600 mb-1">Syllabus Description</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -222,7 +222,7 @@ export default function AdminSubjectsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Display Order</label>
+                  <label className="block font-semibold text-slate-600 mb-1">Display Order</label>
                   <input
                     type="number"
                     value={displayOrder}
@@ -232,7 +232,7 @@ export default function AdminSubjectsPage() {
                 </div>
 
                 <div className="flex items-center pt-5">
-                  <label className="flex items-center gap-2 cursor-pointer text-slate-300 font-medium">
+                  <label className="flex items-center gap-2 cursor-pointer text-slate-600 font-medium">
                     <input
                       type="checkbox"
                       checked={isActive}
@@ -244,7 +244,7 @@ export default function AdminSubjectsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setEditingSubject(null)}
