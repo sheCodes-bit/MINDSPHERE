@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   BookOpen,
   Plus,
@@ -52,7 +52,7 @@ export default function AdminQuestionBankPage() {
   const [importing, setImporting] = useState(false)
   const [importReport, setImportReport] = useState<any | null>(null)
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const [subjectsRes, questionsRes] = await Promise.all([
@@ -65,19 +65,17 @@ export default function AdminQuestionBankPage() {
 
       setSubjects(sData.subjects || [])
       setQuestions(qData.questions || [])
-      if (!subjectId && sData.subjects?.length > 0) {
-        setSubjectId(sData.subjects[0].id)
-      }
+      setSubjectId(prev => prev || (sData.subjects?.[0]?.id || ''))
     } catch {
       toast.error('Failed to load question bank')
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedSubject, selectedDifficulty, statusFilter, search])
 
   useEffect(() => {
     loadData()
-  }, [selectedSubject, selectedDifficulty, statusFilter])
+  }, [loadData])
 
   function handleOpenCreate() {
     setEditingId(null)

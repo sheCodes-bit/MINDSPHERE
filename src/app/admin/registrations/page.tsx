@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   ClipboardList,
   Search,
@@ -29,7 +29,7 @@ export default function AdminRegistrationsPage() {
   const [adminNotes, setAdminNotes] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
 
-  async function fetchTeams() {
+  const fetchTeams = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -45,11 +45,11 @@ export default function AdminRegistrationsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [search, statusFilter])
 
   useEffect(() => {
     fetchTeams()
-  }, [statusFilter])
+  }, [fetchTeams])
 
   async function handleStatusChange(teamId: string, action: string) {
     setActionLoading(true)

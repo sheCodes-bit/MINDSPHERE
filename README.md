@@ -177,6 +177,7 @@ Test files live in `test/`:
 - `test/scoring.additional.test.ts` — Edge cases & policy variants
 - `test/validation.test.ts` — Zod schema validation
 - `test/validation.additional.test.ts` — Boundary & security input tests
+- `test/integration.test.ts` — Integration tests (Branding, References, CSV parsing, 4-Round Tournament simulation)
 
 ---
 

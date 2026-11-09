@@ -1,5 +1,5 @@
-import { Brain, Target, Users, Zap, Shield, Award } from 'lucide-react'
-import { BRAND_CONFIG } from '@/config/branding'
+import { Brain, Target, Users, Zap, Shield, Award, Code2, ExternalLink } from 'lucide-react'
+import { BRAND_CONFIG, getDevelopers } from '@/config/branding'
 
 const PILLARS = [
   { icon: Brain, title: 'Deep Knowledge', desc: 'Thorough mastery of 7 foundational computer science subjects tested under rigorous competition conditions.' },
@@ -9,6 +9,8 @@ const PILLARS = [
 ]
 
 export function AboutSection() {
+  const developers = getDevelopers()
+
   return (
     <section id="about" className="relative py-24 px-4 overflow-hidden border-t border-neutral-800/40">
       <div className="max-w-6xl mx-auto">
@@ -56,7 +58,55 @@ export function AboutSection() {
             <span>Official academic competition guidelines. Adjudicator and jury evaluations are final.</span>
           </div>
         </div>
+
+        {/* Engineering & Platform Development Team */}
+        <div className="mt-12 glass-card p-6 md:p-8 rounded-2xl border border-neutral-800/80">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-neutral-800/60">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 inline-flex items-center gap-1.5">
+                <Code2 className="h-3.5 w-3.5" /> Platform Engineering
+              </span>
+              <h3 className="text-xl font-bold text-white mt-1">Platform Architects & Developers</h3>
+            </div>
+            <p className="text-xs text-slate-400 max-w-md">
+              Designed and developed by university computing scholars dedicated to modern, secure, and competitive technical platforms.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {developers.map((dev) => (
+              <div
+                key={dev.name}
+                className="flex flex-col justify-between p-4 rounded-xl bg-neutral-950/60 border border-neutral-800/70 hover:border-indigo-500/40 transition-colors"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-base font-semibold text-white">{dev.name}</h4>
+                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                      {dev.regNo}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">{dev.title}</p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-neutral-800/60 flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Professional Profile</span>
+                  <a
+                    href={dev.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    <span>LinkedIn</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   )
 }
+

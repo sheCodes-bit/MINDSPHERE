@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   BarChart3,
   Trophy,
@@ -24,7 +24,7 @@ export default function AdminResultsPage() {
   const [publishing, setPublishing] = useState(false)
   const [rounds, setRounds] = useState<any[]>([])
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const [roundsRes, resultsRes] = await Promise.all([
@@ -42,11 +42,11 @@ export default function AdminResultsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [roundNumber])
 
   useEffect(() => {
     loadData()
-  }, [roundNumber])
+  }, [loadData])
 
   async function handleRecalculate() {
     setCalculating(true)

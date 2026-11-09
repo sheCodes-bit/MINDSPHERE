@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
   ScrollText,
   Search,
@@ -50,12 +50,7 @@ export default function AuditLogsPage() {
   const [actionFilter, setActionFilter] = useState('all')
   const [entityFilter, setEntityFilter] = useState('all')
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
-
-  useEffect(() => {
-    fetchLogs()
-  }, [actionFilter, entityFilter])
-
-  async function fetchLogs() {
+  const fetchLogs = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -75,7 +70,11 @@ export default function AuditLogsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [actionFilter, entityFilter])
+
+  useEffect(() => {
+    fetchLogs()
+  }, [fetchLogs])
 
   const filteredLogs = logs.filter(log => {
     if (!searchTerm) return true

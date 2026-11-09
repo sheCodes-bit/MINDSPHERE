@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Radio,
   Clock,
@@ -49,7 +49,7 @@ export default function AdminAdjudicationPage() {
   const rapidQuestionRef = useRef<NodeJS.Timeout | null>(null)
   const buzzerTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  async function loadInitialData() {
+  const loadInitialData = useCallback(async () => {
     setLoading(true)
     try {
       const roundNum = activeTab === 'rapid_fire' ? 3 : 4
@@ -57,23 +57,55 @@ export default function AdminAdjudicationPage() {
       const data = await res.json()
       setTeams(data.teams || [])
       setScoringEvents(data.scoringEvents || [])
-      if (!selectedTeamId && data.teams?.length > 0) {
-        setSelectedTeamId(data.teams[0].id)
-      }
-      if (!buzzerTeamA && data.teams?.length > 0) {
-        setBuzzerTeamA(data.teams[0].id)
-        if (data.teams.length > 1) setBuzzerTeamB(data.teams[1].id)
+      setSelectedTeamId(prev => prev || (data.teams?.[0]?.id || ''))
+      setBuzzerTeamA(prev => prev || (data.teams?.[0]?.id || ''))
+      if (data.teams && data.teams.length > 1) {
+        setBuzzerTeamB(prev => prev || (data.teams[1]?.id || ''))
       }
     } catch {
       toast.error('Failed to load adjudication data')
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTab])
 
   useEffect(() => {
     loadInitialData()
-  }, [activeTab])
+  }, [loadInitialData])
+
+  const handleRapidFireOutcome = useCallback(async (outcome: 'correct' | 'incorrect' | 'skip') => {
+    if (!selectedTeamId) {
+      toast.error('Select a team first')
+      return
+    }
+
+    setQuestionTimeLeft(questionSkipDuration) // Reset 3s question clock
+
+    try {
+      // Find round 3
+      const roundId = '00000003-0003-0003-0003-000000000003'
+      const res = await fetch('/api/admin/adjudication', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'rapid_fire_score',
+          roundId,
+          teamId: selectedTeamId,
+          outcome,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Scoring failed')
+
+      setRapidFireScore(data.totalScore)
+      setRapidFireCount((c) => c + 1)
+      toast.success(`Recorded: ${outcome.toUpperCase()} (+${data.scoreDelta})`)
+      loadInitialData()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error')
+    }
+  }, [selectedTeamId, questionSkipDuration, loadInitialData])
 
   // Rapid Fire Master Timer
   useEffect(() => {
@@ -120,7 +152,7 @@ export default function AdminAdjudicationPage() {
     return () => {
       if (rapidQuestionRef.current) clearInterval(rapidQuestionRef.current)
     }
-  }, [rapidFireRunning, questionSkipDuration, selectedTeamId])
+  }, [rapidFireRunning, questionSkipDuration, handleRapidFireOutcome])
 
   // Buzzer 10s Timer
   useEffect(() => {
@@ -145,40 +177,6 @@ export default function AdminAdjudicationPage() {
       if (buzzerTimerRef.current) clearInterval(buzzerTimerRef.current)
     }
   }, [buzzerTimerRunning])
-
-  async function handleRapidFireOutcome(outcome: 'correct' | 'incorrect' | 'skip') {
-    if (!selectedTeamId) {
-      toast.error('Select a team first')
-      return
-    }
-
-    setQuestionTimeLeft(questionSkipDuration) // Reset 3s question clock
-
-    try {
-      // Find round 3
-      const roundId = '00000003-0003-0003-0003-000000000003'
-      const res = await fetch('/api/admin/adjudication', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'rapid_fire_score',
-          roundId,
-          teamId: selectedTeamId,
-          outcome,
-        }),
-      })
-
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Scoring failed')
-
-      setRapidFireScore(data.totalScore)
-      setRapidFireCount((c) => c + 1)
-      toast.success(`Recorded: ${outcome.toUpperCase()} (+${data.scoreDelta})`)
-      loadInitialData()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error')
-    }
-  }
 
   async function handleTriggerBuzzer(teamId: string) {
     if (!teamId) return
