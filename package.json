@@ -4,7 +4,8 @@
   "description": "NEXORA — The Regional Computing Challenge Platform",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "clean": "node -e \"try { fs.rmSync('.next', { recursive: true, force: true }); } catch {}\"",
+    "dev": "node -e \"try { fs.rmSync('.next/diagnostics', { recursive: true, force: true }); } catch {}\" && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
