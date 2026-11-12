@@ -1,5 +1,5 @@
 /**
- * NEXORA — Additional Validation Schema Tests
+ * COMSATS VSPARK — Additional Validation Schema Tests
  * Covers signInSchema, forgotPasswordSchema, edge-case boundaries,
  * and security-sensitive input handling.
  */

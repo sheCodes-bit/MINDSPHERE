@@ -12,8 +12,8 @@ export default async function AdminParticipantsPage() {
   return (
     <div className="space-y-6 max-w-7xl">
       <div>
-        <h1 className="text-2xl font-black text-white">Participants Directory</h1>
-        <p className="text-xs text-slate-400 mt-1">
+        <h1 className="text-2xl font-black text-slate-900">Participants Directory</h1>
+        <p className="text-xs text-slate-500 mt-1">
           Complete cross-institutional index of all student competitors and university credentials.
         </p>
       </div>
@@ -28,7 +28,7 @@ export default async function AdminParticipantsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-neutral-800 text-slate-400 bg-neutral-950/60 font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-slate-200 text-slate-500 bg-white/60 font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Student Name</th>
                   <th className="py-3 px-4">Student ID / Reg #</th>
                   <th className="py-3 px-4">Team</th>
@@ -40,32 +40,32 @@ export default async function AdminParticipantsPage() {
               </thead>
               <tbody className="divide-y divide-neutral-800/60">
                 {members.map((m: any) => (
-                  <tr key={m.id} className="hover:bg-neutral-900/40 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-white">
+                  <tr key={m.id} className="hover:bg-slate-50/40 transition-colors">
+                    <td className="py-3 px-4 font-semibold text-slate-900">
                       {m.full_name}
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-300">
+                    <td className="py-3 px-4 font-mono font-bold text-blue-600">
                       {m.student_id}
                     </td>
-                    <td className="py-3 px-4 text-slate-200">
-                      <span className="font-medium text-white">{m.teams?.team_name ?? '—'}</span>
+                    <td className="py-3 px-4 text-slate-700">
+                      <span className="font-medium text-slate-900">{m.teams?.team_name ?? '—'}</span>
                       <span className="text-[10px] text-slate-500 font-mono block">
                         {m.teams?.registration_reference ?? ''}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-300 truncate max-w-[160px]">
+                    <td className="py-3 px-4 text-slate-600 truncate max-w-[160px]">
                       {m.teams?.institution_name ?? '—'}
                     </td>
-                    <td className="py-3 px-4 text-slate-400">
+                    <td className="py-3 px-4 text-slate-500">
                       <span>{m.degree_program || 'Student'}</span>
                       {m.semester && <span className="text-slate-500 ml-1">(Sem {m.semester})</span>}
                     </td>
-                    <td className="py-3 px-4 text-slate-400 truncate max-w-[160px]">
+                    <td className="py-3 px-4 text-slate-500 truncate max-w-[160px]">
                       {m.university_email || '—'}
                     </td>
                     <td className="py-3 px-4">
                       {m.is_captain ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100/20 text-blue-600 border border-blue-200/30">
                           <Shield className="h-3 w-3" /> Captain
                         </span>
                       ) : (

@@ -10,6 +10,7 @@ import {
   BarChart3,
   User,
   PlayCircle,
+  GraduationCap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +21,7 @@ const SIDEBAR_LINKS = [
   { href: '/dashboard/team',         label: 'My Team',            icon: Users },
   { href: '/dashboard/registration', label: 'Registration',       icon: ClipboardList },
   { href: '/quiz',                   label: 'Quiz Arena',         icon: PlayCircle },
+  { href: '/practice',               label: 'Practice Bank',      icon: GraduationCap },
   { href: '/dashboard/announcements',label: 'Announcements',      icon: Bell },
   { href: '/dashboard/results',      label: 'Results & Standings',icon: BarChart3 },
   { href: '/dashboard/profile',      label: 'Profile',            icon: User },
@@ -43,7 +45,7 @@ export function DashboardSidebarNav() {
             className={cn('sidebar-link', isActive && 'active')}
             aria-current={isActive ? 'page' : undefined}
           >
-            <Icon className={cn('h-4 w-4', isActive ? 'text-indigo-400' : '')} aria-hidden />
+            <Icon className={cn('h-4 w-4', isActive ? 'text-blue-600' : '')} aria-hidden />
             {label}
           </Link>
         )

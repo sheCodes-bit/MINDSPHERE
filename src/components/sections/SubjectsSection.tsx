@@ -21,7 +21,7 @@ export function SubjectsSection({ subjects }: SubjectsSectionProps) {
   const displaySubjects = subjects.length > 0 ? subjects : []
 
   return (
-    <section id="subjects" className="relative py-24 px-4 bg-slate-900/30">
+    <section id="subjects" className="relative py-24 px-4 bg-primary-50/50 border-y border-primary-100 scroll-mt-24">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <span className="badge-accent mb-4 inline-flex">7 Core Subjects</span>
@@ -47,20 +47,17 @@ export function SubjectsSection({ subjects }: SubjectsSectionProps) {
               return (
                 <div
                   key={subject.id}
-                  className="glass-card p-6 group hover:border-indigo-500/40 hover:-translate-y-1 hover:shadow-card-hover transition-all duration-200 cursor-default"
+                  className="glass-card p-6 group hover:border-blue-300 hover:-translate-y-1 hover:shadow-card-hover transition-all duration-200 cursor-default"
                 >
                   <div className="flex items-start gap-4 mb-3">
-                    <div
-                      className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.20), rgba(147,51,234,0.20))', border: '1px solid rgba(99,102,241,0.30)' }}
-                    >
-                      <IconComp className="h-5 w-5 text-indigo-400" aria-hidden />
+                    <div className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 border border-blue-100">
+                      <IconComp className="h-5 w-5 text-blue-600" aria-hidden />
                     </div>
-                    <span className="text-xs font-mono text-slate-600 mt-0.5">
+                    <span className="text-xs font-mono text-slate-400 mt-0.5">
                       {String(subject.display_order).padStart(2, '0')}
                     </span>
                   </div>
-                  <h3 className="text-base font-semibold text-white leading-snug mb-2 group-hover:text-indigo-300 transition-colors">
+                  <h3 className="text-base font-semibold text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors">
                     {subject.name}
                   </h3>
                   {subject.description && (

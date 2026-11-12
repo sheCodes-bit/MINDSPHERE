@@ -1,5 +1,5 @@
 /**
- * NEXORA — Additional Scoring Engine Tests
+ * COMSATS VSPARK — Additional Scoring Engine Tests
  * Covers edge cases, empty inputs, single-team scenarios, and
  * tie-breaker policies not covered by the base scoring test file.
  */
@@ -22,7 +22,7 @@ describe('rankTeams — edge cases', () => {
 
   it('assigns rank 1 to a single team with no tie flag', () => {
     const single: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'Solo Squad', registrationReference: 'NEX-2026-00001', totalScore: 5 },
+      { teamId: 't1', teamName: 'Solo Squad', registrationReference: 'VSPARK-2026-00001', totalScore: 5 },
     ]
     const ranked = rankTeams(single)
     expect(ranked).toHaveLength(1)
@@ -32,9 +32,9 @@ describe('rankTeams — edge cases', () => {
 
   it('all teams with identical scores are all marked tied', () => {
     const allTied: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 3 },
-      { teamId: 't2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 3 },
-      { teamId: 't3', teamName: 'Team C', registrationReference: 'NEX-2026-00003', totalScore: 3 },
+      { teamId: 't1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 3 },
+      { teamId: 't2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 3 },
+      { teamId: 't3', teamName: 'Team C', registrationReference: 'VSPARK-2026-00003', totalScore: 3 },
     ]
     const ranked = rankTeams(allTied)
     expect(ranked.every(t => t.isTied)).toBe(true)
@@ -43,9 +43,9 @@ describe('rankTeams — edge cases', () => {
 
   it('handles decimal scores correctly', () => {
     const decimal: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 4.5 },
-      { teamId: 't2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 4.0 },
-      { teamId: 't3', teamName: 'Team C', registrationReference: 'NEX-2026-00003', totalScore: 3.5 },
+      { teamId: 't1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 4.5 },
+      { teamId: 't2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 4.0 },
+      { teamId: 't3', teamName: 'Team C', registrationReference: 'VSPARK-2026-00003', totalScore: 3.5 },
     ]
     const ranked = rankTeams(decimal)
     expect(ranked[0].totalScore).toBe(4.5)
@@ -64,8 +64,8 @@ describe('Round 1 Qualification — additional policies', () => {
 
   it('qualifies all teams when 100% threshold used', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 5 },
-      { teamId: 't2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 2 },
+      { teamId: 't1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 5 },
+      { teamId: 't2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 2 },
     ]
     const ranked = rankTeams(teams)
     const result = evaluateRound1Qualification(ranked, 100, 'include_all')
@@ -74,10 +74,10 @@ describe('Round 1 Qualification — additional policies', () => {
 
   it('exclude_all policy eliminates tied teams at cutoff', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 5 },
-      { teamId: 't2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 3 },
-      { teamId: 't3', teamName: 'Team C', registrationReference: 'NEX-2026-00003', totalScore: 3 },
-      { teamId: 't4', teamName: 'Team D', registrationReference: 'NEX-2026-00004', totalScore: 1 },
+      { teamId: 't1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 5 },
+      { teamId: 't2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 3 },
+      { teamId: 't3', teamName: 'Team C', registrationReference: 'VSPARK-2026-00003', totalScore: 3 },
+      { teamId: 't4', teamName: 'Team D', registrationReference: 'VSPARK-2026-00004', totalScore: 1 },
     ]
     const ranked = rankTeams(teams)
     // 80% of 4 = ceil(3.2) = 4; cutoff score = ranked[3].totalScore = 1
@@ -91,9 +91,9 @@ describe('Round 1 Qualification — additional policies', () => {
 
   it('tiebreaker policy flags tied teams with correct note', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'A', registrationReference: 'NEX-001', totalScore: 5 },
-      { teamId: 't2', teamName: 'B', registrationReference: 'NEX-002', totalScore: 3 },
-      { teamId: 't3', teamName: 'C', registrationReference: 'NEX-003', totalScore: 3 },
+      { teamId: 't1', teamName: 'A', registrationReference: 'VSPARK-001', totalScore: 5 },
+      { teamId: 't2', teamName: 'B', registrationReference: 'VSPARK-002', totalScore: 3 },
+      { teamId: 't3', teamName: 'C', registrationReference: 'VSPARK-003', totalScore: 3 },
     ]
     const ranked = rankTeams(teams)
     // 60% of 3 = ceil(1.8) = 2; cutoff = ranked[1].totalScore = 3
@@ -116,11 +116,11 @@ describe('Round 2 Qualification — additional policies', () => {
 
   it('include_all policy qualifies all tied teams at cutoff boundary', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'A', registrationReference: 'NEX-001', totalScore: 5 },
-      { teamId: 't2', teamName: 'B', registrationReference: 'NEX-002', totalScore: 4 },
-      { teamId: 't3', teamName: 'C', registrationReference: 'NEX-003', totalScore: 4 },
-      { teamId: 't4', teamName: 'D', registrationReference: 'NEX-004', totalScore: 4 },
-      { teamId: 't5', teamName: 'E', registrationReference: 'NEX-005', totalScore: 2 },
+      { teamId: 't1', teamName: 'A', registrationReference: 'VSPARK-001', totalScore: 5 },
+      { teamId: 't2', teamName: 'B', registrationReference: 'VSPARK-002', totalScore: 4 },
+      { teamId: 't3', teamName: 'C', registrationReference: 'VSPARK-003', totalScore: 4 },
+      { teamId: 't4', teamName: 'D', registrationReference: 'VSPARK-004', totalScore: 4 },
+      { teamId: 't5', teamName: 'E', registrationReference: 'VSPARK-005', totalScore: 2 },
     ]
     const ranked = rankTeams(teams)
     const result = evaluateRound2Qualification(ranked, 4, 'include_all')
@@ -133,8 +133,8 @@ describe('Round 2 Qualification — additional policies', () => {
 
   it('with fewer than cutoffCount teams, all qualify', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'A', registrationReference: 'NEX-001', totalScore: 5 },
-      { teamId: 't2', teamName: 'B', registrationReference: 'NEX-002', totalScore: 3 },
+      { teamId: 't1', teamName: 'A', registrationReference: 'VSPARK-001', totalScore: 5 },
+      { teamId: 't2', teamName: 'B', registrationReference: 'VSPARK-002', totalScore: 3 },
     ]
     const ranked = rankTeams(teams)
     const result = evaluateRound2Qualification(ranked, 4, 'tiebreaker')
@@ -151,10 +151,10 @@ describe('Round 3 Qualification — additional policies', () => {
 
   it('flags three-way tie for finalist slot', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'A', registrationReference: 'NEX-001', totalScore: 10 },
-      { teamId: 't2', teamName: 'B', registrationReference: 'NEX-002', totalScore: 8 },
-      { teamId: 't3', teamName: 'C', registrationReference: 'NEX-003', totalScore: 8 },
-      { teamId: 't4', teamName: 'D', registrationReference: 'NEX-004', totalScore: 8 },
+      { teamId: 't1', teamName: 'A', registrationReference: 'VSPARK-001', totalScore: 10 },
+      { teamId: 't2', teamName: 'B', registrationReference: 'VSPARK-002', totalScore: 8 },
+      { teamId: 't3', teamName: 'C', registrationReference: 'VSPARK-003', totalScore: 8 },
+      { teamId: 't4', teamName: 'D', registrationReference: 'VSPARK-004', totalScore: 8 },
     ]
     const ranked = rankTeams(teams)
     const result = evaluateRound3Qualification(ranked, 2, 'tiebreaker')
@@ -176,7 +176,7 @@ describe('Round 4 Championship — edge cases', () => {
 
   it('single team is declared champion without tie flag', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'Sole Competitor', registrationReference: 'NEX-001', totalScore: 5 },
+      { teamId: 't1', teamName: 'Sole Competitor', registrationReference: 'VSPARK-001', totalScore: 5 },
     ]
     const ranked = rankTeams(teams)
     const result = evaluateRound4Champion(ranked)
@@ -187,8 +187,8 @@ describe('Round 4 Championship — edge cases', () => {
 
   it('runner up note is set correctly for the losing finalist', () => {
     const teams: TeamScoreEntry[] = [
-      { teamId: 't1', teamName: 'Winner', registrationReference: 'NEX-001', totalScore: 9.5 },
-      { teamId: 't2', teamName: 'Loser', registrationReference: 'NEX-002', totalScore: 7.0 },
+      { teamId: 't1', teamName: 'Winner', registrationReference: 'VSPARK-001', totalScore: 9.5 },
+      { teamId: 't2', teamName: 'Loser', registrationReference: 'VSPARK-002', totalScore: 7.0 },
     ]
     const ranked = rankTeams(teams)
     const result = evaluateRound4Champion(ranked)

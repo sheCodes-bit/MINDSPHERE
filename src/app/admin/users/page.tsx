@@ -109,35 +109,35 @@ export default function UsersAdminPage() {
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-6 w-6 text-amber-400" />
-            <h1 className="text-2xl font-bold tracking-tight text-white">Users & Role Authorization</h1>
+            <ShieldCheck className="h-6 w-6 text-amber-600" />
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Users & Role Authorization</h1>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Governs Role-Based Access Control (RBAC). Admin roles are strictly isolated and protected.
           </p>
         </div>
 
         {/* Counter cards */}
         <div className="flex items-center gap-3">
-          <div className="px-3.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs">
-            <span className="text-slate-400">Total Users: </span>
-            <span className="font-bold text-white ml-1">{users.length}</span>
+          <div className="px-3.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+            <span className="text-slate-500">Total Users: </span>
+            <span className="font-bold text-slate-900 ml-1">{users.length}</span>
           </div>
-          <div className="px-3.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs">
-            <span className="text-amber-300">Admins: </span>
-            <span className="font-bold text-amber-400 ml-1">{adminCount}</span>
+          <div className="px-3.5 py-1.5 rounded-lg bg-amber-50 border border-amber-500/20 text-xs">
+            <span className="text-amber-600">Admins: </span>
+            <span className="font-bold text-amber-600 ml-1">{adminCount}</span>
           </div>
         </div>
       </div>
 
       {/* Security alert box */}
-      <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-800/40 text-amber-200/90 text-xs leading-relaxed flex items-start gap-3">
-        <Lock className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+      <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-800/40 text-amber-700/90 text-xs leading-relaxed flex items-start gap-3">
+        <Lock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
         <div>
-          <span className="font-semibold text-amber-300">Security Safeguards Active:</span> Public registrations can never assign the administrator role. Administrators can neither revoke their own privileges nor remove the sole remaining administrator. All role assignments are written immutably to <code className="bg-amber-900/40 px-1 py-0.5 rounded text-amber-300">audit_logs</code>.
+          <span className="font-semibold text-amber-600">Security Safeguards Active:</span> Public registrations can never assign the administrator role. Administrators can neither revoke their own privileges nor remove the sole remaining administrator. All role assignments are written immutably to <code className="bg-amber-900/40 px-1 py-0.5 rounded text-amber-600">audit_logs</code>.
         </div>
       </div>
 
@@ -150,19 +150,19 @@ export default function UsersAdminPage() {
             placeholder="Search by name or email..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-neutral-900/80 border border-neutral-800 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50/80 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Filter className="h-4 w-4 text-slate-500 hidden sm:block" />
-          <div className="flex bg-neutral-900/80 p-1 border border-neutral-800 rounded-lg text-xs w-full sm:w-auto">
+          <div className="flex bg-slate-50/80 p-1 border border-slate-200 rounded-lg text-xs w-full sm:w-auto">
             <button
               onClick={() => setRoleFilter('all')}
               className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-md font-medium transition-colors ${
                 roleFilter === 'all'
-                  ? 'bg-neutral-800 text-white'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-100 text-slate-900'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               All ({users.length})
@@ -171,8 +171,8 @@ export default function UsersAdminPage() {
               onClick={() => setRoleFilter('admin')}
               className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-md font-medium transition-colors ${
                 roleFilter === 'admin'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-amber-100 text-amber-600 border border-amber-200'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               Admins ({adminCount})
@@ -181,8 +181,8 @@ export default function UsersAdminPage() {
               onClick={() => setRoleFilter('participant')}
               className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-md font-medium transition-colors ${
                 roleFilter === 'participant'
-                  ? 'bg-neutral-800 text-slate-200'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-100 text-slate-700'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               Participants ({participantCount})
@@ -192,20 +192,20 @@ export default function UsersAdminPage() {
       </div>
 
       {/* User Table */}
-      <div className="bg-neutral-900/50 border border-neutral-800/80 rounded-xl overflow-hidden backdrop-blur-sm">
+      <div className="bg-slate-50/50 border border-slate-200/80 rounded-xl overflow-hidden backdrop-blur-sm">
         {loading ? (
-          <div className="flex flex-col items-center justify-center p-12 text-slate-400 gap-3">
+          <div className="flex flex-col items-center justify-center p-12 text-slate-500 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
             <p className="text-sm">Fetching user directory & role matrix...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">
+          <div className="p-12 text-center text-slate-500">
             <p className="text-sm">No users match your criteria.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-neutral-950/80 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-neutral-800">
+              <thead className="bg-white/80 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                 <tr>
                   <th className="px-5 py-3.5">User Details</th>
                   <th className="px-5 py-3.5">Assigned Role</th>
@@ -219,21 +219,21 @@ export default function UsersAdminPage() {
                   <tr key={user.id} className="hover:bg-neutral-850/40 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center font-bold text-xs text-amber-400 shrink-0">
+                        <div className="h-9 w-9 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-xs text-amber-600 shrink-0">
                           {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-white truncate text-sm">
+                            <span className="font-semibold text-slate-900 truncate text-sm">
                               {user.full_name}
                             </span>
                             {user.is_self && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100/20 text-blue-600 border border-blue-200/30">
                                 You
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5">
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
                             <Mail className="h-3 w-3 text-slate-500" />
                             <span className="truncate">{user.email}</span>
                           </div>
@@ -243,25 +243,25 @@ export default function UsersAdminPage() {
 
                     <td className="px-5 py-4">
                       {user.is_admin ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-500/15 text-amber-600 border border-amber-200">
                           <ShieldCheck className="h-3.5 w-3.5" />
                           Administrator
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-800 text-slate-300 border border-neutral-700">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-300">
                           Participant
                         </span>
                       )}
                     </td>
 
-                    <td className="px-5 py-4 text-xs text-slate-400">
+                    <td className="px-5 py-4 text-xs text-slate-500">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="h-3.5 w-3.5 text-slate-500" />
                         <span>{new Date(user.created_at).toLocaleDateString()}</span>
                       </div>
                     </td>
 
-                    <td className="px-5 py-4 text-xs text-slate-400">
+                    <td className="px-5 py-4 text-xs text-slate-500">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5 text-slate-500" />
                         <span>
@@ -280,7 +280,7 @@ export default function UsersAdminPage() {
                           type="button"
                           disabled={actionLoadingId === user.id}
                           onClick={() => setConfirmModal({ user, action: 'revoke_admin' })}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 transition-colors"
                         >
                           <UserX className="h-3.5 w-3.5" />
                           Revoke Admin
@@ -290,7 +290,7 @@ export default function UsersAdminPage() {
                           type="button"
                           disabled={actionLoadingId === user.id}
                           onClick={() => setConfirmModal({ user, action: 'grant_admin' })}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 border border-amber-500/30 transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-600 hover:text-amber-600 hover:bg-amber-50 border border-amber-200 transition-colors"
                         >
                           <UserCheck className="h-3.5 w-3.5" />
                           Make Admin
@@ -308,41 +308,41 @@ export default function UsersAdminPage() {
       {/* Confirmation Modal */}
       {confirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 max-w-md w-full space-y-4 shadow-xl">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 max-w-md w-full space-y-4 shadow-xl">
             <div className="flex items-center gap-3">
               <div
                 className={`p-2.5 rounded-full ${
                   confirmModal.action === 'grant_admin'
-                    ? 'bg-amber-500/10 text-amber-400'
-                    : 'bg-red-500/10 text-red-400'
+                    ? 'bg-amber-50 text-amber-600'
+                    : 'bg-red-50 text-red-600'
                 }`}
               >
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-white">
+                <h3 className="text-base font-semibold text-slate-900">
                   {confirmModal.action === 'grant_admin'
                     ? 'Grant Administrator Role'
                     : 'Revoke Administrator Role'}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Confirm RBAC credential alteration
                 </p>
               </div>
             </div>
 
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <p className="text-sm text-slate-600 leading-relaxed">
               Are you sure you want to{' '}
               {confirmModal.action === 'grant_admin' ? (
-                <strong className="text-amber-400">grant full Administrator privileges to</strong>
+                <strong className="text-amber-600">grant full Administrator privileges to</strong>
               ) : (
-                <strong className="text-red-400">revoke Administrator access from</strong>
+                <strong className="text-red-600">revoke Administrator access from</strong>
               )}{' '}
-              <span className="text-white font-medium">{confirmModal.user.full_name}</span> (
-              <span className="text-slate-400 text-xs font-mono">{confirmModal.user.email}</span>)?
+              <span className="text-slate-900 font-medium">{confirmModal.user.full_name}</span> (
+              <span className="text-slate-500 text-xs font-mono">{confirmModal.user.email}</span>)?
             </p>
 
-            <div className="p-3 rounded-lg bg-neutral-950 border border-neutral-800 text-[11px] text-slate-400">
+            <div className="p-3 rounded-lg bg-white border border-slate-200 text-[11px] text-slate-500">
               {confirmModal.action === 'grant_admin'
                 ? 'This user will gain full operational access over question banks, adjudication, team approvals, and score overrides.'
                 : 'This user will revert to standard participant privileges and lose access to all admin routes and API actions.'}
@@ -352,7 +352,7 @@ export default function UsersAdminPage() {
               <button
                 type="button"
                 onClick={() => setConfirmModal(null)}
-                className="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                className="px-4 py-2 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
               >
                 Cancel
               </button>

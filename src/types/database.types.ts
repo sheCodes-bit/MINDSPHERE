@@ -8,6 +8,7 @@ export type Database = {
           id: string
           full_name: string | null
           avatar_url: string | null
+          username: string | null
           created_at: string
           updated_at: string
         }
@@ -15,6 +16,7 @@ export type Database = {
           id: string
           full_name?: string | null
           avatar_url?: string | null
+          username?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -22,6 +24,7 @@ export type Database = {
           id?: string
           full_name?: string | null
           avatar_url?: string | null
+          username?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -151,6 +154,10 @@ export type Database = {
           submitted_at: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          is_solo: boolean
+          is_removed: boolean
+          removed_at: string | null
+          removed_by: string | null
           created_at: string
           updated_at: string
         }
@@ -168,6 +175,10 @@ export type Database = {
           notes?: string | null
           admin_notes?: string | null
           submitted_at?: string | null
+          is_solo?: boolean
+          is_removed?: boolean
+          removed_at?: string | null
+          removed_by?: string | null
         }
         Update: {
           team_name?: string
@@ -181,6 +192,10 @@ export type Database = {
           admin_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          is_solo?: boolean
+          is_removed?: boolean
+          removed_at?: string | null
+          removed_by?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -199,10 +214,16 @@ export type Database = {
           team_id: string
           user_id: string | null
           full_name: string
-          student_id: string
+          student_id: string | null
           university_email: string | null
           degree_program: string | null
           semester: string | null
+          email: string | null
+          username: string | null
+          contact_phone: string | null
+          account_status: string
+          invited_at: string | null
+          activated_at: string | null
           is_captain: boolean
           created_at: string
           updated_at: string
@@ -212,18 +233,30 @@ export type Database = {
           team_id: string
           user_id?: string | null
           full_name: string
-          student_id: string
+          student_id?: string | null
           university_email?: string | null
           degree_program?: string | null
           semester?: string | null
+          email?: string | null
+          username?: string | null
+          contact_phone?: string | null
+          account_status?: string
+          invited_at?: string | null
+          activated_at?: string | null
           is_captain?: boolean
         }
         Update: {
           full_name?: string
-          student_id?: string
+          student_id?: string | null
           university_email?: string | null
           degree_program?: string | null
           semester?: string | null
+          email?: string | null
+          username?: string | null
+          contact_phone?: string | null
+          account_status?: string
+          invited_at?: string | null
+          activated_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -978,6 +1011,127 @@ export type Database = {
           }
         ]
       }
+      question_banks: {
+        Row: {
+          id: string
+          uploaded_by: string | null
+          original_filename: string
+          storage_path: string
+          file_size: number
+          mime_type: string
+          encryption_algorithm: string
+          key_version: number
+          iv: string
+          auth_tag: string
+          row_count: number
+          status: string
+          published_at: string | null
+          published_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          uploaded_by: string
+          original_filename: string
+          storage_path: string
+          file_size: number
+          mime_type: string
+          encryption_algorithm?: string
+          key_version?: number
+          iv: string
+          auth_tag: string
+          row_count?: number
+          status?: string
+          published_at?: string | null
+          published_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          uploaded_by?: string
+          original_filename?: string
+          storage_path?: string
+          file_size?: number
+          mime_type?: string
+          encryption_algorithm?: string
+          key_version?: number
+          iv?: string
+          auth_tag?: string
+          row_count?: number
+          status?: string
+          published_at?: string | null
+          published_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_banks_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_banks_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practice_questions: {
+        Row: {
+          id: string
+          question_bank_id: string | null
+          subject_id: string | null
+          question_text: string
+          difficulty: 'easy' | 'medium' | 'hard'
+          options: Json
+          explanation: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          question_bank_id?: string | null
+          subject_id?: string | null
+          question_text: string
+          difficulty: 'easy' | 'medium' | 'hard'
+          options?: Json
+          explanation?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          question_bank_id?: string | null
+          subject_id?: string | null
+          question_text?: string
+          difficulty?: 'easy' | 'medium' | 'hard'
+          options?: Json
+          explanation?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_questions_question_bank_id_fkey"
+            columns: ["question_bank_id"]
+            isOneToOne: false
+            referencedRelation: "question_banks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "practice_questions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -992,6 +1146,27 @@ export type Database = {
       generate_registration_ref: {
         Args: Record<string, never>
         Returns: string
+      }
+      is_team_leader: {
+        Args: { target_team_id: string }
+        Returns: boolean
+      }
+      max_teams_per_university: {
+        Args: Record<string, never>
+        Returns: number
+      }
+      register_team: {
+        Args: {
+          p_leader_id: string
+          p_team_name: string
+          p_university: string
+          p_campus: string | null
+          p_contact_email: string
+          p_contact_phone: string | null
+          p_notes: string | null
+          p_members: Json
+        }
+        Returns: Array<{ team_id: string; registration_reference: string }>
       }
     }
     Enums: {

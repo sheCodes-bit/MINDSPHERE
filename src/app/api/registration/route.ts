@@ -1,29 +1,113 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { teamRegistrationSchema } from '@/lib/validations/schemas'
-import { generateRegistrationRef } from '@/lib/utils'
+import { randomBytes } from 'crypto'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import type { Database, Json } from '@/types/database.types'
+import { teamRegistrationV2Schema, teamUpdateV2Schema } from '@/lib/validations/schemas'
+import { DEFAULT_MAX_TEAMS_PER_UNIVERSITY } from '@/config/constants'
 
-export async function GET(request: NextRequest) {
+/**
+ * Team registration (solo or 1–3 members).
+ *
+ * Security model:
+ *  - Only an authenticated leader may submit, and only for their own email.
+ *  - The team + members + consent are inserted by the `register_team` RPC in a
+ *    single transaction. Unique team names and the per-university limit are
+ *    enforced inside that transaction with a Postgres advisory lock, so two
+ *    simultaneous submissions cannot exceed the limit.
+ *  - Every member gets their own Supabase Auth account (real email, random
+ *    internal password that is never revealed) and activates it through a
+ *    password-setup email. No shared passwords, no fake emails.
+ *  - If the RPC fails, any auth accounts created for this attempt are removed.
+ */
+
+const MAX_MEMBERS = 3
+
+type CreatedAccount = { email: string; id: string }
+
+function appOrigin(request: NextRequest) {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
+  if (configured && !configured.includes('localhost')) return configured
+  return new URL(request.url).origin
+}
+
+function mapDbError(message: string): { status: number; error: string } {
+  if (message.includes('TEAM_NAME_TAKEN') || message.includes('teams_team_name_lower_uidx')) {
+    return { status: 409, error: 'A team with this name is already registered. Please choose another name.' }
+  }
+  if (message.includes('UNIVERSITY_LIMIT_REACHED')) {
+    return { status: 409, error: 'This university has reached its maximum number of teams for the competition.' }
+  }
+  if (message.includes('ALREADY_REGISTERED')) {
+    return { status: 409, error: 'Your account is already part of a registered team.' }
+  }
+  if (message.includes('INVALID_MEMBER_COUNT')) {
+    return { status: 400, error: 'A team must contain between 1 and 3 members.' }
+  }
+  if (message.includes('team_members_email_lower_uidx')) {
+    return { status: 409, error: 'One of the member emails is already registered with another team.' }
+  }
+  if (message.includes('profiles_username_lower_uidx')) {
+    return { status: 409, error: 'One of the usernames is already taken. Please choose another.' }
+  }
+  return { status: 500, error: 'Registration could not be completed. Please try again.' }
+}
+
+async function findExistingTeamForUser(admin: Awaited<ReturnType<typeof createAdminClient>>, userId: string) {
+  const { data: captainTeam } = await admin
+    .from('teams')
+    .select('id, registration_reference, status')
+    .eq('captain_id', userId)
+    .eq('is_removed', false)
+    .maybeSingle()
+  if (captainTeam) return captainTeam
+
+  const { data: memberRow } = await admin
+    .from('team_members')
+    .select('team_id, teams(id, registration_reference, status, is_removed)')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  const team = (memberRow as any)?.teams
+  if (team && !team.is_removed) {
+    return { id: team.id, registration_reference: team.registration_reference, status: team.status }
+  }
+  return null
+}
+
+export async function GET() {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: team, error: teamError } = await supabase
-      .from('teams')
-      .select('*, team_members(*)')
-      .eq('captain_id', user.id)
+    const { data: membership } = await supabase
+      .from('team_members')
+      .select('team_id')
+      .eq('user_id', user.id)
       .maybeSingle()
 
-    if (teamError) {
-      return NextResponse.json({ error: teamError.message }, { status: 500 })
+    let teamId = membership?.team_id ?? null
+    if (!teamId) {
+      const { data: ownTeam } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('captain_id', user.id)
+        .eq('is_removed', false)
+        .maybeSingle()
+      teamId = ownTeam?.id ?? null
     }
 
-    return NextResponse.json({ team })
+    if (!teamId) return NextResponse.json({ team: null, is_leader: false })
+
+    const { data: team, error } = await supabase
+      .from('teams')
+      .select('*, team_members(*)')
+      .eq('id', teamId)
+      .maybeSingle()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ team, is_leader: team?.captain_id === user.id })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to fetch registration'
     return NextResponse.json({ error: message }, { status: 500 })
@@ -31,188 +115,302 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const createdAccounts: CreatedAccount[] = []
+  let committed = false
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
+    if (!user?.email) {
       return NextResponse.json({ error: 'Please sign in before submitting a team registration.' }, { status: 401 })
     }
 
-    // 1. Check if user already registered a team
-    const { data: existingTeam } = await supabase
-      .from('teams')
-      .select('id, registration_reference, status')
-      .eq('captain_id', user.id)
-      .maybeSingle()
+    const admin = await createAdminClient()
 
-    if (existingTeam) {
+    // 1. One registration per account.
+    const existing = await findExistingTeamForUser(admin, user.id)
+    if (existing) {
       return NextResponse.json({
-        error: `You have already registered a team (${existingTeam.registration_reference}). Multiple team registrations per captain are not permitted.`,
+        error: `Your account is already registered with team ${existing.registration_reference}.`,
       }, { status: 409 })
     }
 
-    // 2. Check competition settings
+    // 2. Registration window / global capacity.
     const { data: settings } = await supabase
       .from('competition_settings')
       .select('key, value')
-      .in('key', ['registration_status', 'registration_close_at', 'max_teams', 'team_min_members', 'team_max_members'])
+      .in('key', ['registration_status', 'registration_close_at', 'max_teams'])
 
-    const settingsMap = Object.fromEntries((settings ?? []).map(s => [s.key, s.value]))
-    const status = settingsMap['registration_status'] ?? 'closed'
-
-    if (status !== 'open') {
-      return NextResponse.json({
-        error: 'Team registration is currently closed.',
-      }, { status: 403 })
+    const settingsMap = Object.fromEntries((settings ?? []).map((s) => [s.key, s.value]))
+    if ((settingsMap['registration_status'] ?? 'closed') !== 'open') {
+      return NextResponse.json({ error: 'Team registration is currently closed.' }, { status: 403 })
     }
-
     if (settingsMap['registration_close_at']) {
       const deadline = new Date(settingsMap['registration_close_at']).getTime()
-      if (Date.now() > deadline) {
-        return NextResponse.json({
-          error: 'The registration deadline has passed.',
-        }, { status: 403 })
+      if (Number.isFinite(deadline) && Date.now() > deadline) {
+        return NextResponse.json({ error: 'The registration deadline has passed.' }, { status: 403 })
       }
     }
-
     if (settingsMap['max_teams']) {
       const maxCount = parseInt(settingsMap['max_teams'], 10)
-      const { count } = await supabase
+      const { count } = await admin
         .from('teams')
         .select('*', { count: 'exact', head: true })
-        .in('status', ['submitted', 'approved', 'under_review'])
-
-      if (count !== null && count >= maxCount) {
-        return NextResponse.json({
-          error: 'Maximum team capacity reached for this competition edition.',
-        }, { status: 403 })
+        .eq('is_removed', false)
+        .in('status', ['submitted', 'approved', 'under_review', 'waitlisted'])
+      if (Number.isFinite(maxCount) && (count ?? 0) >= maxCount) {
+        return NextResponse.json({ error: 'Maximum competition capacity has been reached.' }, { status: 403 })
       }
     }
 
-    // 3. Parse & Validate Payload
-    const body = await request.json()
-    const validation = teamRegistrationSchema.safeParse(body)
+    // 3. Validate payload.
+    const body = await request.json().catch(() => null)
+    const validation = teamRegistrationV2Schema.safeParse(body)
     if (!validation.success) {
       return NextResponse.json({
         error: 'Validation failed',
-        details: validation.error.format(),
+        details: validation.error.flatten(),
       }, { status: 400 })
     }
 
-    const { team_name, institution_name, campus, region, contact_email, contact_phone, notes, members } = validation.data
+    const { team_name, university, campus, region, contact_phone, notes, members } = validation.data
+    if (members.length > MAX_MEMBERS) {
+      return NextResponse.json({ error: 'A team cannot exceed 3 members.' }, { status: 400 })
+    }
 
-    // Check unique student IDs
-    const studentIds = members.map(m => m.student_id.toLowerCase().trim())
-    const uniqueIds = new Set(studentIds)
-    if (uniqueIds.size !== studentIds.length) {
+    const leader = members.find((m) => m.is_leader)!
+    if (leader.email.toLowerCase() !== user.email.toLowerCase()) {
       return NextResponse.json({
-        error: 'Each team member must have a unique student registration ID.',
-      }, { status: 400 })
+        error: 'The team leader must be the signed-in account holder. Sign in with the leader email and try again.',
+      }, { status: 403 })
     }
 
-    // Check if team name already taken
-    const { data: nameCheck } = await supabase
+    // 4. Duplicate pre-checks (the DB constraints remain authoritative).
+    const { data: nameTaken } = await admin
       .from('teams')
       .select('id')
-      .ilike('team_name', team_name.trim())
+      .eq('is_removed', false)
+      .ilike('team_name', team_name)
       .maybeSingle()
+    if (nameTaken) {
+      return NextResponse.json({ error: 'A team with this name is already registered. Please choose another name.' }, { status: 409 })
+    }
 
-    if (nameCheck) {
+    const { data: limitSetting } = await admin
+      .from('competition_settings')
+      .select('value')
+      .eq('key', 'max_teams_per_university')
+      .maybeSingle()
+    const perUniversityLimit = Math.max(1, parseInt(limitSetting?.value ?? '', 10) || DEFAULT_MAX_TEAMS_PER_UNIVERSITY)
+    const { count: universityCount } = await admin
+      .from('teams')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_removed', false)
+      .ilike('institution_name', university)
+    if ((universityCount ?? 0) >= perUniversityLimit) {
       return NextResponse.json({
-        error: 'A team with this name is already registered. Please choose another name.',
+        error: `This university has reached its limit of ${perUniversityLimit} teams.`,
       }, { status: 409 })
     }
 
-    // 4. Generate Registration Reference
-    let reference = generateRegistrationRef()
-    const { data: rpcRef } = await supabase.rpc('generate_registration_ref')
-    if (rpcRef) reference = rpcRef
-
-    // 5. Insert Team
-    const { data: newTeam, error: insertError } = await supabase
-      .from('teams')
-      .insert({
-        registration_reference: reference,
-        team_name: team_name.trim(),
-        institution_name: institution_name.trim(),
-        campus: campus ? campus.trim() : null,
-        region: region ? region.trim() : null,
-        captain_id: user.id,
-        contact_email: contact_email.trim(),
-        contact_phone: contact_phone ? contact_phone.trim() : null,
-        notes: notes ? notes.trim() : null,
-        status: 'submitted',
-        submitted_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (insertError || !newTeam) {
-      return NextResponse.json({ error: insertError?.message ?? 'Failed to create team record' }, { status: 500 })
+    const emails = members.map((m) => m.email.toLowerCase())
+    if (new Set(emails).size !== emails.length) {
+      return NextResponse.json({ error: 'Each member must have a different email address.' }, { status: 400 })
     }
 
-    // 6. Insert Members
-    const membersToInsert = members.map((m, idx) => ({
-      team_id: newTeam.id,
-      user_id: idx === 0 ? user.id : null,
-      full_name: m.full_name.trim(),
-      student_id: m.student_id.trim(),
-      university_email: m.university_email ? m.university_email.trim() : null,
-      degree_program: m.degree_program ? m.degree_program.trim() : null,
-      semester: m.semester ? m.semester.trim() : null,
-      is_captain: idx === 0,
-    }))
-
-    const { error: membersError } = await supabase
+    const { data: emailConflict } = await admin
       .from('team_members')
-      .insert(membersToInsert)
-
-    if (membersError) {
-      // rollback team creation if possible
-      await supabase.from('teams').delete().eq('id', newTeam.id)
-      return NextResponse.json({ error: `Failed to save team members: ${membersError.message}` }, { status: 500 })
+      .select('id, email')
+      .in('email', emails)
+      .limit(1)
+      .maybeSingle()
+    if (emailConflict) {
+      return NextResponse.json({
+        error: 'One of these email addresses is already registered with another team.',
+      }, { status: 409 })
     }
 
-    // 7. Record Consent
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || null
-    await supabase.from('registration_consents').insert({
-      team_id: newTeam.id,
-      user_id: user.id,
-      rules_version: '1.0',
-      ip_address: ip,
+    const usernames = members.map((m) => m.username.toLowerCase())
+    const { data: usernameConflicts } = await admin
+      .from('profiles')
+      .select('id, username')
+      .in('username', usernames)
+    // The leader's own existing profile is not a conflict.
+    const takenUsernames = new Set(
+      (usernameConflicts ?? [])
+        .filter((p) => p.id !== user.id)
+        .map((p) => (p.username ?? '').toLowerCase())
+    )
+    if (takenUsernames.size > 0) {
+      const taken = usernames.filter((u) => takenUsernames.has(u))
+      return NextResponse.json({ error: `Username already taken: ${taken.join(', ')}. Please choose another.` }, { status: 409 })
+    }
+
+    // 5. Leader's username is the login identity of the signed-in account.
+    const { data: leaderProfile, error: leaderProfileError } = await admin
+      .from('profiles')
+      .select('id, username')
+      .eq('id', user.id)
+      .single()
+    if (leaderProfileError || !leaderProfile) {
+      return NextResponse.json({ error: 'Your participant profile could not be loaded.' }, { status: 500 })
+    }
+    const leaderUsername = leaderProfile.username?.toLowerCase() || leader.username.toLowerCase()
+    if (!leaderProfile.username) {
+      const { error: profileUpdateError } = await admin
+        .from('profiles')
+        .update({ username: leaderUsername, updated_at: new Date().toISOString() })
+        .eq('id', user.id)
+      if (profileUpdateError) {
+        return NextResponse.json({ error: 'That username is unavailable. Please choose another.' }, { status: 409 })
+      }
+    }
+
+    // 6. Create an individual account for every non-leader member.
+    for (const member of members) {
+      if (member.is_leader) continue
+
+      const { data: created, error: createError } = await admin.auth.admin.createUser({
+        email: member.email,
+        // Random secret is never stored or disclosed; the member sets their own
+        // password through the activation email. Email is confirmed because the
+        // activation link is delivered to that real address.
+        password: randomBytes(32).toString('base64url'),
+        email_confirm: true,
+        user_metadata: {
+          full_name: member.full_name,
+          username: member.username.toLowerCase(),
+        },
+      })
+
+      if (createError || !created?.user?.id) {
+        const message = createError?.message ?? 'Account creation failed'
+        const friendly = /already|registered|exists/i.test(message)
+          ? `${member.email} already has an account or is already registered.`
+          : `Could not create an account for ${member.email}.`
+        // Compensating cleanup: remove accounts created before the failure.
+        for (const account of createdAccounts) {
+          await admin.auth.admin.deleteUser(account.id).catch(() => undefined)
+        }
+        return NextResponse.json({ error: friendly }, { status: 409 })
+      }
+
+      createdAccounts.push({ email: member.email, id: created.user.id })
+    }
+
+    // 7. Atomic team + member insert.
+    const memberPayload = members.map((member) => {
+      const isLeader = !!member.is_leader
+      const account = createdAccounts.find((a) => a.email === member.email)
+      return {
+        user_id: isLeader ? user.id : account?.id ?? '',
+        full_name: member.full_name,
+        email: member.email,
+        username: isLeader ? leaderUsername : member.username.toLowerCase(),
+        student_id: member.student_id || '',
+        contact_phone: member.contact_phone || '',
+        is_captain: isLeader,
+        account_status: isLeader ? 'active' : 'invited',
+      }
     })
 
-    // 8. In-App Notification
-    await supabase.from('notifications').insert({
-      user_id: user.id,
-      type: 'registration_submitted',
-      title: 'Registration Submitted',
-      message: `Your team "${team_name}" has been registered successfully with reference ${reference}. The committee is currently reviewing your submission.`,
+    const { data: rpcData, error: rpcError } = await admin.rpc('register_team', {
+      p_leader_id: user.id,
+      p_team_name: team_name,
+      p_university: university,
+      p_campus: campus || null,
+      p_contact_email: user.email,
+      p_contact_phone: contact_phone || null,
+      p_notes: notes || null,
+      p_members: memberPayload,
     })
 
-    // 9. Audit Log
-    await supabase.from('audit_logs').insert({
-      actor_id: user.id,
-      actor_email: user.email,
-      action: 'create',
-      entity_type: 'teams',
-      entity_id: newTeam.id,
-      after_state: { team_name, reference, membersCount: members.length },
-      metadata: { source: 'api/registration' },
-      ip_address: ip,
-      user_agent: request.headers.get('user-agent'),
-    })
+    if (rpcError) {
+      for (const account of createdAccounts) {
+        await admin.auth.admin.deleteUser(account.id).catch(() => undefined)
+      }
+      const mapped = mapDbError(rpcError.message)
+      return NextResponse.json({ error: mapped.error }, { status: mapped.status })
+    }
+
+    committed = true
+    const result = Array.isArray(rpcData) ? rpcData[0] : rpcData
+    const teamId: string = (result as any)?.team_id
+    const reference: string = (result as any)?.registration_reference
+
+    // The team is committed. Side effects below must never roll it back.
+    const deliveryFailures: string[] = []
+    try {
+      const origin = appOrigin(request)
+      const inviteClient = await createClient()
+      for (const account of createdAccounts) {
+        const { error: inviteError } = await inviteClient.auth.resetPasswordForEmail(account.email, {
+          redirectTo: `${origin}/auth/activate`,
+        })
+        if (inviteError) deliveryFailures.push(account.email)
+      }
+
+      const notifications = [
+        {
+          user_id: user.id,
+          type: 'registration_submitted',
+          title: 'Registration Submitted',
+          message: `Team "${team_name}" has been registered with reference ${reference}. Activation emails were sent to your teammates.`,
+        },
+        ...createdAccounts.map((account) => ({
+          user_id: account.id,
+          type: 'registration_submitted',
+          title: 'You were added to a team',
+          message: `You are a member of "${team_name}" (${reference}). Check your email to set your password and access your own dashboard.`,
+        })),
+      ]
+      await admin.from('notifications').insert(notifications)
+
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || null
+      await admin.from('audit_logs').insert({
+        actor_id: user.id,
+        actor_email: user.email,
+        action: 'create',
+        entity_type: 'teams',
+        entity_id: teamId,
+        after_state: {
+          team_name,
+          university,
+          reference,
+          member_count: members.length,
+          is_solo: members.length === 1,
+        },
+        metadata: { source: 'api/registration', created_accounts: createdAccounts.length },
+        ip_address: ip,
+        user_agent: request.headers.get('user-agent'),
+      })
+    } catch (sideEffectError) {
+      console.error('[registration] post-commit side effect failed', sideEffectError)
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Registration submitted successfully',
-      team: newTeam,
+      message: members.length === 1
+        ? 'Solo registration submitted successfully.'
+        : 'Team registration submitted. Individual activation emails were sent to your teammates.',
+      team_id: teamId,
       reference,
+      member_count: members.length,
+      delivery_failures: deliveryFailures,
     }, { status: 201 })
   } catch (err) {
+    if (!committed) {
+      for (const account of createdAccounts) {
+        try {
+          const admin = await createAdminClient()
+          await admin.auth.admin.deleteUser(account.id)
+        } catch {
+          // Best-effort compensation only.
+        }
+      }
+    }
     const message = err instanceof Error ? err.message : 'Registration failed'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[registration] error', message)
+    return NextResponse.json({ error: 'Registration could not be completed. Please try again.' }, { status: 500 })
   }
 }
 
@@ -220,73 +418,60 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check existing team owned by user
-    const { data: team, error: teamErr } = await supabase
+    const admin = await createAdminClient()
+    const { data: team } = await admin
       .from('teams')
-      .select('id, status')
+      .select('id, captain_id, status, institution_name, is_removed')
       .eq('captain_id', user.id)
-      .single()
+      .eq('is_removed', false)
+      .maybeSingle()
 
-    if (teamErr || !team) {
-      return NextResponse.json({ error: 'Team not found' }, { status: 404 })
+    if (!team) {
+      return NextResponse.json({ error: 'Team not found or you are not the team leader.' }, { status: 404 })
     }
-
-    // Only allow editing if draft, submitted, or under_review
-    if (['approved', 'disqualified', 'rejected'].includes(team.status)) {
+    if (!['draft', 'submitted', 'under_review'].includes(team.status)) {
       return NextResponse.json({
-        error: `Cannot update a team with status "${team.status}". Contact the competition organizers for assistance.`,
+        error: `Team details cannot be changed while the registration is "${team.status}".`,
       }, { status: 403 })
     }
 
-    const body = await request.json()
-    const validation = teamRegistrationSchema.safeParse(body)
+    const body = await request.json().catch(() => null)
+    const validation = teamUpdateV2Schema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json({ error: 'Validation failed', details: validation.error.format() }, { status: 400 })
+      return NextResponse.json({ error: 'Validation failed', details: validation.error.flatten() }, { status: 400 })
     }
 
-    const { team_name, institution_name, campus, region, contact_email, contact_phone, notes, members } = validation.data
+    const updates: Database['public']['Tables']['teams']['Update'] = { updated_at: new Date().toISOString() }
+    if (validation.data.team_name !== undefined) updates.team_name = validation.data.team_name
+    if (validation.data.university !== undefined) updates.institution_name = validation.data.university
+    if (validation.data.campus !== undefined) updates.campus = validation.data.campus || null
+    if (validation.data.region !== undefined) updates.region = validation.data.region || null
+    if (validation.data.contact_phone !== undefined) updates.contact_phone = validation.data.contact_phone || null
+    if (validation.data.notes !== undefined) updates.notes = validation.data.notes || null
 
-    // Update team table
-    const { error: updateErr } = await supabase
-      .from('teams')
-      .update({
-        team_name: team_name.trim(),
-        institution_name: institution_name.trim(),
-        campus: campus ? campus.trim() : null,
-        region: region ? region.trim() : null,
-        contact_email: contact_email.trim(),
-        contact_phone: contact_phone ? contact_phone.trim() : null,
-        notes: notes ? notes.trim() : null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', team.id)
-
-    if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 500 })
+    const { error } = await admin.from('teams').update(updates).eq('id', team.id)
+    if (error) {
+      const mapped = mapDbError(error.message)
+      return NextResponse.json({ error: mapped.error }, { status: mapped.status })
     }
 
-    // Replace members
-    await supabase.from('team_members').delete().eq('team_id', team.id)
-    const membersToInsert = members.map((m, idx) => ({
-      team_id: team.id,
-      user_id: idx === 0 ? user.id : null,
-      full_name: m.full_name.trim(),
-      student_id: m.student_id.trim(),
-      university_email: m.university_email ? m.university_email.trim() : null,
-      degree_program: m.degree_program ? m.degree_program.trim() : null,
-      semester: m.semester ? m.semester.trim() : null,
-      is_captain: idx === 0,
-    }))
-    await supabase.from('team_members').insert(membersToInsert)
+    await admin.from('audit_logs').insert({
+      actor_id: user.id,
+      actor_email: user.email,
+      action: 'update',
+      entity_type: 'teams',
+      entity_id: team.id,
+      before_state: { institution_name: team.institution_name },
+      after_state: updates as Json,
+      metadata: { source: 'api/registration', by: 'team_leader' },
+    })
 
-    return NextResponse.json({ success: true, message: 'Team details updated successfully' })
+    return NextResponse.json({ success: true, message: 'Team details updated.' })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Update failed'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[registration] update error', message)
+    return NextResponse.json({ error: 'Team details could not be updated.' }, { status: 500 })
   }
 }

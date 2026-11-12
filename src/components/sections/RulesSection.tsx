@@ -26,7 +26,7 @@ const TIE_RULES = [
 
 export function RulesSection() {
   return (
-    <section id="rules" className="relative py-24 px-4 bg-slate-900/30">
+    <section id="rules" className="relative py-24 px-4 bg-primary-50/50 border-y border-primary-100 scroll-mt-24">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <span className="badge-accent mb-4 inline-flex">Official Rules</span>
@@ -39,20 +39,18 @@ export function RulesSection() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* General Rules */}
           <div className="lg:col-span-2">
             <div className="glass-card p-6 md:p-8 h-full">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.20), rgba(147,51,234,0.20))', border: '1px solid rgba(99,102,241,0.30)' }}>
-                  <BookOpen className="h-5 w-5 text-indigo-400" aria-hidden />
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-blue-50 border border-blue-100">
+                  <BookOpen className="h-5 w-5 text-blue-600" aria-hidden />
                 </div>
-                <h3 className="text-xl font-bold text-white">General Rules</h3>
+                <h3 className="text-xl font-bold text-slate-900">General Rules</h3>
               </div>
               <ul className="space-y-3">
                 {GENERAL_RULES.map((rule, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
-                    <CheckCircle className="h-4 w-4 text-indigo-400 mt-0.5 shrink-0" aria-hidden />
+                  <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                    <CheckCircle className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" aria-hidden />
                     {rule}
                   </li>
                 ))}
@@ -60,40 +58,35 @@ export function RulesSection() {
             </div>
           </div>
 
-          {/* Right column */}
           <div className="space-y-6">
-            {/* Tie-breaker */}
             <div className="glass-card p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.20), rgba(147,51,234,0.20))', border: '1px solid rgba(99,102,241,0.30)' }}>
-                  <Users className="h-5 w-5 text-indigo-400" aria-hidden />
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-blue-50 border border-blue-100">
+                  <Users className="h-5 w-5 text-blue-600" aria-hidden />
                 </div>
-                <h3 className="text-lg font-bold text-white">Tie-Breaker</h3>
+                <h3 className="text-lg font-bold text-slate-900">Tie-Breaker</h3>
               </div>
               <ul className="space-y-2.5">
                 {TIE_RULES.map((rule, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-400">
-                    <span className="text-indigo-500 mt-0.5 shrink-0 font-bold">{i + 1}.</span>
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                    <span className="text-blue-600 mt-0.5 shrink-0 font-bold">{i + 1}.</span>
                     {rule}
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Disqualification */}
             <div className="glass-card p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.10))', border: '1px solid rgba(239,68,68,0.25)' }}>
-                  <ShieldAlert className="h-5 w-5 text-red-400" aria-hidden />
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-red-50 border border-red-100">
+                  <ShieldAlert className="h-5 w-5 text-red-600" aria-hidden />
                 </div>
-                <h3 className="text-lg font-bold text-white">Disqualification</h3>
+                <h3 className="text-lg font-bold text-slate-900">Disqualification</h3>
               </div>
               <ul className="space-y-2.5">
                 {DISQUALIFICATION_RULES.map((rule, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-400">
-                    <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" aria-hidden />
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                    <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" aria-hidden />
                     {rule}
                   </li>
                 ))}

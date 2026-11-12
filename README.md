@@ -1,8 +1,8 @@
-# NEXORA — The Regional Computing Challenge
+# COMSATS VSPARK — Quiz Competition
 
 > **"Challenge your knowledge. Prove your intelligence."**
 
-NEXORA is a full-stack web platform for managing a regional university-level computing competition. It supports team registration, four-round competition management (MCQ → Rapid Fire → Buzzer Final), live adjudication, automated scoring, results publication, and a complete admin console.
+COMSATS VSPARK is a full-stack web platform for managing a regional university-level computing competition. It supports team registration, four-round competition management (MCQ → Rapid Fire → Buzzer Final), live adjudication, automated scoring, results publication, and a complete admin console.
 
 ---
 
@@ -91,7 +91,8 @@ Copy `.env.example` to `.env.local` and fill in:
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server-only** service role key (never expose to client) |
-| `NEXT_PUBLIC_APP_URL` | App base URL (e.g. `https://nexora.vercel.app`) |
+| `QUESTION_BANK_ENCRYPTION_KEY` | **Server-only** AES-256-GCM key (base64 32 bytes or strong passphrase) |
+| `NEXT_PUBLIC_APP_URL` | App base URL (e.g. `https://mindsphere.example.com`) |
 | `NEXT_PUBLIC_DEVELOPER_ESHA_LINKEDIN_URL` | LinkedIn URL for Esha Minahil |
 | `NEXT_PUBLIC_DEVELOPER_SEERAT_LINKEDIN_URL` | LinkedIn URL for Seerat Rauf |
 
@@ -111,12 +112,45 @@ supabase/migrations/002_rls_policies.sql
 -- 3. Seed data (subjects, rounds, competition settings)
 supabase/migrations/003_seed_data.sql
 
--- 4. NEXORA rebranding (updates registration ref format + settings)
+-- 4. COMSATS VSPARK rebranding (updates registration ref format + settings)
 supabase/migrations/004_nexora_rebranding.sql
 
 -- 5. Security fixes (additive — notification policy, non-captain member access)
 supabase/migrations/005_security_fixes.sql
+
+-- 6. MINDSPHERE rebranding reference format
+supabase/migrations/006_vspark_rebranding.sql
+
+-- 7. Encrypted question banks + practice question tables
+supabase/migrations/007_secure_question_bank.sql
+
+-- 8. Team registration redesign (usernames + invitation records)
+supabase/migrations/008_team_registration_redesign.sql
+
+-- 9. Private storage bucket + question-bank RLS hardening
+supabase/migrations/009_question_bank_storage_hardening.sql
+
+-- 10. Full team model, DB-enforced limits, membership RLS, atomic RPC
+supabase/migrations/010_team_registration_redesign.sql
 ```
+
+### Manual Supabase configuration
+
+1. **Encryption key** — generate one locally and add it to `.env.local` (server only):
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+   ```
+   Set `QUESTION_BANK_ENCRYPTION_KEY` and restart the server. Never expose it with a `NEXT_PUBLIC_` prefix.
+2. **Storage bucket** — migration 009 creates the private `question-banks` bucket. If your project
+   disallows SQL on `storage.buckets`, create a bucket named `question-banks` manually and keep it
+   **private**; do not add storage policies for `anon`/`authenticated`.
+3. **Auth email** — teammate invitations and password resets use Supabase Auth email. Configure
+   Authentication → SMTP (or keep the built-in sender for testing) and add
+   `https://your-domain/auth/activate` to Authentication → URL Configuration → Redirect URLs.
+4. **Email confirmation** — leader sign-ups follow your project’s “Confirm email” setting. Teammate
+   accounts are created server-side and activated through the emailed password-setup link.
+5. **Service role** — `SUPABASE_SERVICE_ROLE_KEY` must be set on the server (Vercel env vars). It is
+   used only by server routes for admin checks, invitations and the registration RPC.
 
 ### Google OAuth Setup
 
@@ -177,6 +211,8 @@ Test files live in `test/`:
 - `test/scoring.additional.test.ts` — Edge cases & policy variants
 - `test/validation.test.ts` — Zod schema validation
 - `test/validation.additional.test.ts` — Boundary & security input tests
+- `test/registration-redesign.test.ts` — Solo / 1–3 member registration rules + username login
+- `test/encryption.test.ts` — AES-256-GCM round-trip, tamper detection, answer stripping
 - `test/integration.test.ts` — Integration tests (Branding, References, CSV parsing, 4-Round Tournament simulation)
 
 ---
@@ -204,13 +240,47 @@ Test files live in `test/`:
 
 ---
 
+## Secure Question Bank
+
+- Admins upload **CSV or XLSX** files from **Admin → Question Bank → Secure Encrypted Question Banks**.
+  The existing single-row question importer is unchanged; this is the encrypted-bank workflow.
+- Files are parsed and validated on the server, encrypted with **AES-256-GCM** (fresh IV + auth tag per
+  upload) and stored as ciphertext in the private `question-banks` bucket. The key exists only in
+  `QUESTION_BANK_ENCRYPTION_KEY`.
+- **View** decrypts server-side for admins only. No IV, auth tag, ciphertext or key is ever returned to
+  the browser, and the browser never receives the key.
+- **Publish practice** requires a separate admin action and creates rows in `practice_questions` with
+  option text only — correct answers are never copied. **Unpublish** removes them immediately.
+- Published practice questions are available to everyone at `/practice`.
+- Round questions are unaffected: participants still receive only the questions assigned to their
+  active round, via server-side quiz APIs.
+
+## Team Registration & Accounts
+
+- A leader registers either **solo (1 member)** or a **team of 2–3 members** in one process from
+  Dashboard → My Team.
+- Team names are unique (case-insensitive). The per-university limit defaults to **6** and is editable
+  in Admin → Registrations. Both rules are enforced inside Postgres with an advisory transaction lock,
+  so simultaneous submissions cannot exceed the limit.
+- Every member gets their own Supabase Auth account with their real email, a unique username and their
+  own password. Teammates activate accounts through the emailed password-setup link (`/auth/activate`).
+  Leaders never set or see teammate passwords.
+- Username login is handled by `POST /api/auth/login`: the server resolves username → account with the
+  service role, then signs in with the password. Errors are uniform to prevent username enumeration.
+- Every member sees the same team progress in their own dashboard. Only the leader can edit team name,
+  university and contact details before approval; roster/account emails are locked.
+- Admins manage registrations grouped by university, edit/approve/reject/remove teams, and every action
+  is written to `audit_logs`.
+
 ## Security Notes
 
 - Answer keys (`is_correct`, `correct_option_id`) are **never** sent to the client.
 - All scoring is evaluated server-side.
 - Admin role assignment requires a running Supabase session with `is_admin()` returning `true`.
 - The service role key is used only in server-side API routes and never in browser code.
-- RLS is enforced on all 22 database tables.
+- RLS is enforced on all database tables; encrypted-bank metadata is admin-only and the storage bucket
+  is private with no client policies.
+- Username lookup, decryption and practice publishing happen only in server routes.
 - Audit logs are append-only and record all admin actions.
 
 ---
@@ -224,4 +294,4 @@ Test files live in `test/`:
 
 ---
 
-© 2025 NEXORA — The Regional Computing Challenge. All rights reserved.
+© 2025 COMSATS VSPARK — Quiz Competition. All rights reserved.

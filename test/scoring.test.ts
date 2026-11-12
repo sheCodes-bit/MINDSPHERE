@@ -8,13 +8,13 @@ import {
   type TeamScoreEntry,
 } from '@/lib/scoring'
 
-describe('NEXORA Scoring & Qualification Engine', () => {
+describe('COMSATS VSPARK Scoring & Qualification Engine', () => {
   const sampleTeams: TeamScoreEntry[] = [
-    { teamId: 't1', teamName: 'Alpha Coders', registrationReference: 'NEX-2025-00001', totalScore: 5 },
-    { teamId: 't2', teamName: 'Beta Bytes',   registrationReference: 'NEX-2025-00002', totalScore: 4 },
-    { teamId: 't3', teamName: 'Gamma Geeks',  registrationReference: 'NEX-2025-00003', totalScore: 4 },
-    { teamId: 't4', teamName: 'Delta Devs',   registrationReference: 'NEX-2025-00004', totalScore: 3 },
-    { teamId: 't5', teamName: 'Epsilon Elite', registrationReference: 'NEX-2025-00005', totalScore: 1 },
+    { teamId: 't1', teamName: 'Alpha Coders', registrationReference: 'VSPARK-2025-00001', totalScore: 5 },
+    { teamId: 't2', teamName: 'Beta Bytes',   registrationReference: 'VSPARK-2025-00002', totalScore: 4 },
+    { teamId: 't3', teamName: 'Gamma Geeks',  registrationReference: 'VSPARK-2025-00003', totalScore: 4 },
+    { teamId: 't4', teamName: 'Delta Devs',   registrationReference: 'VSPARK-2025-00004', totalScore: 3 },
+    { teamId: 't5', teamName: 'Epsilon Elite', registrationReference: 'VSPARK-2025-00005', totalScore: 1 },
   ]
 
   describe('rankTeams', () => {
@@ -47,11 +47,11 @@ describe('NEXORA Scoring & Qualification Engine', () => {
 
     it('handles ties at cutoff boundary with include_all policy', () => {
       const tiedTeams: TeamScoreEntry[] = [
-        { teamId: 't1', teamName: 'Team 1', registrationReference: 'NEX-2026-00001', totalScore: 10 },
-        { teamId: 't2', teamName: 'Team 2', registrationReference: 'NEX-2026-00002', totalScore: 8 },
-        { teamId: 't3', teamName: 'Team 3', registrationReference: 'NEX-2026-00003', totalScore: 5 },
-        { teamId: 't4', teamName: 'Team 4', registrationReference: 'NEX-2026-00004', totalScore: 5 }, // tied at cutoff
-        { teamId: 't5', teamName: 'Team 5', registrationReference: 'NEX-2026-00005', totalScore: 2 },
+        { teamId: 't1', teamName: 'Team 1', registrationReference: 'VSPARK-2026-00001', totalScore: 10 },
+        { teamId: 't2', teamName: 'Team 2', registrationReference: 'VSPARK-2026-00002', totalScore: 8 },
+        { teamId: 't3', teamName: 'Team 3', registrationReference: 'VSPARK-2026-00003', totalScore: 5 },
+        { teamId: 't4', teamName: 'Team 4', registrationReference: 'VSPARK-2026-00004', totalScore: 5 }, // tied at cutoff
+        { teamId: 't5', teamName: 'Team 5', registrationReference: 'VSPARK-2026-00005', totalScore: 2 },
       ]
       const ranked = rankTeams(tiedTeams)
       const result = evaluateRound1Qualification(ranked, 60, 'include_all') // ceil(5 * 0.6) = 3
@@ -77,10 +77,10 @@ describe('NEXORA Scoring & Qualification Engine', () => {
   describe('Round 3 Qualification (Top 2 Finalists)', () => {
     it('qualifies top 2 teams for the Grand Championship Final', () => {
       const round3Teams: TeamScoreEntry[] = [
-        { teamId: 't1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 18 },
-        { teamId: 't2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 15 },
-        { teamId: 't3', teamName: 'Team C', registrationReference: 'NEX-2026-00003', totalScore: 12 },
-        { teamId: 't4', teamName: 'Team D', registrationReference: 'NEX-2026-00004', totalScore: 10 },
+        { teamId: 't1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 18 },
+        { teamId: 't2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 15 },
+        { teamId: 't3', teamName: 'Team C', registrationReference: 'VSPARK-2026-00003', totalScore: 12 },
+        { teamId: 't4', teamName: 'Team D', registrationReference: 'VSPARK-2026-00004', totalScore: 10 },
       ]
       const ranked = rankTeams(round3Teams)
       const qualified = evaluateRound3Qualification(ranked, 2)
@@ -95,8 +95,8 @@ describe('NEXORA Scoring & Qualification Engine', () => {
   describe('Round 4 Championship (Grand Champion)', () => {
     it('identifies the clear Grand Champion', () => {
       const finalTeams: TeamScoreEntry[] = [
-        { teamId: 't1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 8.5 },
-        { teamId: 't2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 6.0 },
+        { teamId: 't1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 8.5 },
+        { teamId: 't2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 6.0 },
       ]
       const ranked = rankTeams(finalTeams)
       const result = evaluateRound4Champion(ranked)
@@ -109,8 +109,8 @@ describe('NEXORA Scoring & Qualification Engine', () => {
 
     it('flags tied winners for sudden-death buzzer tiebreaker', () => {
       const finalTeamsTied: TeamScoreEntry[] = [
-        { teamId: 't1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 7.0 },
-        { teamId: 't2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 7.0 },
+        { teamId: 't1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 7.0 },
+        { teamId: 't2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 7.0 },
       ]
       const ranked = rankTeams(finalTeamsTied)
       const result = evaluateRound4Champion(ranked)

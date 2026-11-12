@@ -4,9 +4,30 @@ export const APP_NAME = BRAND_CONFIG.name
 export const APP_SUBTITLE = BRAND_CONFIG.subtitle
 export const APP_TAGLINE = BRAND_CONFIG.tagline
 export const APP_DESCRIPTION = BRAND_CONFIG.shortDescription
-export const TEAM_MIN_MEMBERS = 2
+export const TEAM_MIN_MEMBERS = 1
 export const TEAM_MAX_MEMBERS = 3
+export const DEFAULT_MAX_TEAMS_PER_UNIVERSITY = 6
 export const RULES_VERSION = '1.0'
+
+/** Universities offered in the team registration form. "Other" allows any institution. */
+export const UNIVERSITIES = [
+  'COMSATS University Islamabad (CUI)',
+  'COMSATS University Islamabad — Vehari Campus',
+  'COMSATS University Islamabad — Lahore Campus',
+  'COMSATS University Islamabad — Wah Campus',
+  'COMSATS University Islamabad — Abbottabad Campus',
+  'National University of Sciences & Technology (NUST)',
+  'FAST National University (FAST-NU)',
+  'University of Engineering & Technology (UET) Lahore',
+  'Punjab University College of Information Technology (PUCIT)',
+  'Government College University (GCU) Lahore',
+  'Air University',
+  'Bahria University',
+  'Riphah International University',
+  'University of Central Punjab (UCP)',
+  'University of Management & Technology (UMT)',
+  'Other',
+] as const
 
 export const DEVELOPERS = getDevelopers()
 // Backward compatibility exports

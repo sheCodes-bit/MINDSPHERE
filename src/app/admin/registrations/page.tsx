@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ClipboardList,
   Search,
@@ -8,25 +8,81 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Clock,
+  Building,
+  Users,
   Download,
   Eye,
   RefreshCw,
-  Building,
-  Users,
-  ShieldAlert,
+  Trash2,
+  Undo2,
+  Save,
+  Settings2,
+  Mail,
+  Phone,
+  Hash,
+  UserRound,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { TEAM_STATUS_LABELS } from '@/config/constants'
-import { getTeamStatusColor, formatDate, formatDateTime } from '@/lib/utils'
+import { TEAM_STATUS_LABELS, DEFAULT_MAX_TEAMS_PER_UNIVERSITY } from '@/config/constants'
+import { getTeamStatusColor, formatDate } from '@/lib/utils'
+
+interface TeamMember {
+  id: string
+  full_name: string
+  email: string | null
+  username: string | null
+  student_id: string | null
+  contact_phone: string | null
+  is_captain: boolean
+  account_status?: string
+  user_id: string | null
+}
+
+interface Team {
+  id: string
+  registration_reference: string
+  team_name: string
+  institution_name: string
+  campus: string | null
+  region: string | null
+  contact_email: string
+  contact_phone: string | null
+  status: string
+  admin_notes: string | null
+  is_solo: boolean
+  is_removed: boolean
+  submitted_at: string | null
+  team_members: TeamMember[]
+}
+
+interface UniversityGroup {
+  university: string
+  teams: number
+  solo: number
+}
 
 export default function AdminRegistrationsPage() {
-  const [teams, setTeams] = useState<any[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
+  const [groups, setGroups] = useState<UniversityGroup[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [selectedTeam, setSelectedTeam] = useState<any | null>(null)
+  const [universityFilter, setUniversityFilter] = useState('all')
+  const [includeRemoved, setIncludeRemoved] = useState(false)
+  const [maxTeams, setMaxTeams] = useState(DEFAULT_MAX_TEAMS_PER_UNIVERSITY)
+  const [limitDraft, setLimitDraft] = useState(String(DEFAULT_MAX_TEAMS_PER_UNIVERSITY))
+  const [savingLimit, setSavingLimit] = useState(false)
+
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
   const [adminNotes, setAdminNotes] = useState('')
+  const [editForm, setEditForm] = useState({
+    teamName: '',
+    university: '',
+    contactEmail: '',
+    contactPhone: '',
+    campus: '',
+    region: '',
+  })
   const [actionLoading, setActionLoading] = useState(false)
 
   const fetchTeams = useCallback(async () => {
@@ -35,157 +91,236 @@ export default function AdminRegistrationsPage() {
       const params = new URLSearchParams()
       if (search) params.set('search', search)
       if (statusFilter !== 'all') params.set('status', statusFilter)
+      if (universityFilter !== 'all') params.set('university', universityFilter)
+      if (includeRemoved) params.set('include_removed', 'true')
 
       const res = await fetch(`/api/admin/registrations?${params.toString()}`)
-      if (!res.ok) throw new Error('Failed to load registrations')
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to load registrations')
       setTeams(data.teams || [])
+      setGroups(data.universities || [])
+      setMaxTeams(data.max_teams_per_university ?? DEFAULT_MAX_TEAMS_PER_UNIVERSITY)
+      setLimitDraft(String(data.max_teams_per_university ?? DEFAULT_MAX_TEAMS_PER_UNIVERSITY))
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error fetching registrations')
     } finally {
       setLoading(false)
     }
-  }, [search, statusFilter])
+  }, [search, statusFilter, universityFilter, includeRemoved])
 
-  useEffect(() => {
-    fetchTeams()
-  }, [fetchTeams])
+  useEffect(() => { fetchTeams() }, [fetchTeams])
 
-  async function handleStatusChange(teamId: string, action: string) {
+  const grouped = useMemo(() => {
+    const map = new Map<string, Team[]>()
+    for (const team of teams) {
+      const list = map.get(team.institution_name) ?? []
+      list.push(team)
+      map.set(team.institution_name, list)
+    }
+    return Array.from(map.entries()).sort((a, b) => b[1].length - a[1].length)
+  }, [teams])
+
+  function openTeam(team: Team) {
+    setSelectedTeam(team)
+    setAdminNotes(team.admin_notes || '')
+    setEditForm({
+      teamName: team.team_name,
+      university: team.institution_name,
+      contactEmail: team.contact_email,
+      contactPhone: team.contact_phone || '',
+      campus: team.campus || '',
+      region: team.region || '',
+    })
+  }
+
+  async function patch(payload: Record<string, unknown>) {
     setActionLoading(true)
     try {
       const res = await fetch('/api/admin/registrations', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teamId, action, adminNotes }),
+        body: JSON.stringify(payload),
       })
-
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'Action failed')
-      }
-
-      toast.success(`Team marked as ${action}`)
-      setSelectedTeam(null)
-      setAdminNotes('')
-      fetchTeams()
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Action failed')
+      toast.success(data.message || 'Saved')
+      return true
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to update status')
+      toast.error(err instanceof Error ? err.message : 'Action failed')
+      return false
     } finally {
       setActionLoading(false)
     }
   }
 
-  function handleExportCSV() {
-    if (teams.length === 0) {
-      toast.error('No registrations to export')
+  async function handleStatusChange(teamId: string, action: string) {
+    const ok = await patch({ teamId, action, adminNotes })
+    if (ok) {
+      setSelectedTeam(null)
+      fetchTeams()
+    }
+  }
+
+  async function handleSaveEdit() {
+    if (!selectedTeam) return
+    const ok = await patch({
+      teamId: selectedTeam.id,
+      action: 'edit',
+      teamName: editForm.teamName,
+      university: editForm.university,
+      contactEmail: editForm.contactEmail,
+      contactPhone: editForm.contactPhone,
+      campus: editForm.campus,
+      region: editForm.region,
+      adminNotes,
+    })
+    if (ok) {
+      setSelectedTeam(null)
+      fetchTeams()
+    }
+  }
+
+  async function handleRemove(team: Team) {
+    if (!window.confirm(`Remove "${team.team_name}" from the competition? Results and history are preserved.`)) return
+    const ok = await patch({ teamId: team.id, action: team.is_removed ? 'restore' : 'remove' })
+    if (ok) {
+      setSelectedTeam(null)
+      fetchTeams()
+    }
+  }
+
+  async function handleSaveLimit() {
+    const value = Number(limitDraft)
+    if (!Number.isInteger(value) || value < 1 || value > 100) {
+      toast.error('Enter a whole number between 1 and 100.')
       return
     }
+    setSavingLimit(true)
+    const ok = await patch({ action: 'update_limit', maxTeamsPerUniversity: value })
+    setSavingLimit(false)
+    if (ok) {
+      setMaxTeams(value)
+      fetchTeams()
+    }
+  }
 
+  function handleExportCSV() {
+    if (teams.length === 0) {
+      toast.error('No registrations to export.')
+      return
+    }
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
     const headers = [
-      'Reference ID',
-      'Team Name',
-      'Institution',
-      'Campus',
-      'Region',
-      'Contact Email',
-      'Phone',
-      'Status',
-      'Submitted At',
-      'Member 1 (Captain)',
-      'Member 1 Student ID',
-      'Member 2',
-      'Member 2 Student ID',
-      'Member 3',
-      'Member 3 Student ID',
+      'Reference', 'Team Name', 'University', 'Type', 'Status', 'Leader Email', 'Contact Phone',
+      'Member Name', 'Member Email', 'Username', 'Registration No.', 'Member Phone', 'Is Leader',
     ]
-
-    const rows = teams.map(t => {
-      const m1 = t.team_members?.[0] || {}
-      const m2 = t.team_members?.[1] || {}
-      const m3 = t.team_members?.[2] || {}
-
-      return [
-        `"${t.registration_reference || ''}"`,
-        `"${(t.team_name || '').replace(/"/g, '""')}"`,
-        `"${(t.institution_name || '').replace(/"/g, '""')}"`,
-        `"${(t.campus || '').replace(/"/g, '""')}"`,
-        `"${(t.region || '').replace(/"/g, '""')}"`,
-        `"${t.contact_email || ''}"`,
-        `"${t.contact_phone || ''}"`,
-        `"${t.status || ''}"`,
-        `"${t.submitted_at || ''}"`,
-        `"${(m1.full_name || '').replace(/"/g, '""')}"`,
-        `"${m1.student_id || ''}"`,
-        `"${(m2.full_name || '').replace(/"/g, '""')}"`,
-        `"${m2.student_id || ''}"`,
-        `"${(m3.full_name || '').replace(/"/g, '""')}"`,
-        `"${m3.student_id || ''}"`,
-      ].join(',')
-    })
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n')
-    const encodedUri = encodeURI(csvContent)
+    const rows: string[] = []
+    for (const team of teams) {
+      for (const member of team.team_members ?? []) {
+        rows.push([
+          esc(team.registration_reference), esc(team.team_name), esc(team.institution_name),
+          esc(team.is_solo ? 'Solo' : 'Team'), esc(team.status), esc(team.contact_email),
+          esc(team.contact_phone), esc(member.full_name), esc(member.email), esc(member.username),
+          esc(member.student_id), esc(member.contact_phone), esc(member.is_captain ? 'Yes' : 'No'),
+        ].join(','))
+      }
+    }
+    const blob = new Blob([[headers.map(esc).join(','), ...rows].join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute('download', `nexora_registrations_${new Date().toISOString().slice(0, 10)}.csv`)
-    document.body.appendChild(link)
+    link.href = url
+    link.download = `mindsphere_registrations_${new Date().toISOString().slice(0, 10)}.csv`
     link.click()
-    document.body.removeChild(link)
-    toast.success('Registrations exported to CSV')
+    URL.revokeObjectURL(url)
+    toast.success('Registrations exported.')
   }
 
   return (
     <div className="space-y-6 max-w-7xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Registration Management</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Review applicant teams, evaluate eligibility, record official decisions, and export rosters.
+          <h1 className="text-2xl font-black text-slate-900">Registration Management</h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Teams grouped by university, with individual member accounts, approval decisions, and audit logging.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={fetchTeams}
-            className="btn-ghost text-xs px-3 py-2 flex items-center gap-1.5"
-            title="Refresh list"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Refresh
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200">
+            <Settings2 className="h-3.5 w-3.5 text-blue-600" />
+            <label htmlFor="team-limit" className="text-[11px] font-semibold text-slate-600 whitespace-nowrap">
+              Max teams / university
+            </label>
+            <input
+              id="team-limit"
+              type="number"
+              min={1}
+              max={100}
+              value={limitDraft}
+              onChange={(e) => setLimitDraft(e.target.value)}
+              className="w-14 text-xs font-mono border border-slate-200 rounded-md px-1.5 py-1"
+            />
+            <button
+              type="button"
+              onClick={handleSaveLimit}
+              disabled={savingLimit}
+              className="text-[11px] font-bold text-blue-700 hover:text-blue-800 disabled:opacity-50"
+            >
+              Save
+            </button>
+          </div>
 
-          <button
-            onClick={handleExportCSV}
-            className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5 shadow-glow-sm"
-          >
-            <Download className="h-3.5 w-3.5" />
-            Export CSV
+          <button onClick={fetchTeams} className="btn-ghost text-xs px-3 py-2" title="Refresh">
+            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          </button>
+          <button onClick={handleExportCSV} className="btn-primary text-xs px-4 py-2">
+            <Download className="h-3.5 w-3.5" /> Export CSV
           </button>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            fetchTeams()
-          }}
-          className="relative w-full sm:w-80"
-        >
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search team, institution, ref..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="form-input pl-9 text-xs py-2 w-full"
-          />
-        </form>
+      <div className="glass-card p-4 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <form
+            onSubmit={(e) => { e.preventDefault(); fetchTeams() }}
+            className="relative"
+          >
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search team, university, participant, reference…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="form-input pl-9 text-xs py-2 w-full"
+            />
+          </form>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+          <select
+            value={universityFilter}
+            onChange={(e) => setUniversityFilter(e.target.value)}
+            className="form-input text-xs py-2 w-full"
+            aria-label="Filter by university"
+          >
+            <option value="all">All universities</option>
+            {groups.map((g) => (
+              <option key={g.university} value={g.university}>
+                {g.university} ({g.teams})
+              </option>
+            ))}
+          </select>
+
+          <label className="flex items-center gap-2 text-xs text-slate-600 px-1">
+            <input
+              type="checkbox"
+              checked={includeRemoved}
+              onChange={(e) => setIncludeRemoved(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-slate-300 accent-blue-600"
+            />
+            Include removed registrations
+          </label>
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <Filter className="h-4 w-4 text-slate-500 shrink-0" />
           {['all', 'submitted', 'under_review', 'approved', 'waitlisted', 'rejected', 'disqualified'].map((st) => (
             <button
@@ -193,8 +328,8 @@ export default function AdminRegistrationsPage() {
               onClick={() => setStatusFilter(st)}
               className={`text-xs px-3 py-1.5 rounded-lg border transition-colors shrink-0 capitalize ${
                 statusFilter === st
-                  ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50 font-bold'
-                  : 'bg-neutral-900 text-slate-400 border-neutral-800 hover:text-white'
+                  ? 'bg-blue-600 text-white border-blue-600 font-bold'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
               }`}
             >
               {st.replace('_', ' ')}
@@ -203,187 +338,259 @@ export default function AdminRegistrationsPage() {
         </div>
       </div>
 
-      {/* Registrations Table */}
-      <div className="glass-card overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-indigo-400" />
-            Loading registrations...
-          </div>
-        ) : teams.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 text-sm">
-            <ClipboardList className="h-10 w-10 text-slate-600 mx-auto mb-2" />
-            No registration records found matching the filter criteria.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-neutral-800 text-slate-400 bg-neutral-950/60 font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4">Reference</th>
-                  <th className="py-3 px-4">Team Name</th>
-                  <th className="py-3 px-4">Institution</th>
-                  <th className="py-3 px-4">Region</th>
-                  <th className="py-3 px-4">Members</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Submitted</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-800/60">
-                {teams.map((t) => (
-                  <tr key={t.id} className="hover:bg-neutral-900/40 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-300">
-                      {t.registration_reference}
-                    </td>
-                    <td className="py-3 px-4 font-semibold text-white">
-                      {t.team_name}
-                    </td>
-                    <td className="py-3 px-4 text-slate-300 truncate max-w-[160px]">
-                      {t.institution_name}
-                    </td>
-                    <td className="py-3 px-4 text-slate-400">{t.region || '—'}</td>
-                    <td className="py-3 px-4 text-slate-300 font-medium">
-                      {t.team_members?.length ?? 0} students
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={getTeamStatusColor(t.status)}>
-                        {TEAM_STATUS_LABELS[t.status] ?? t.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-500 font-mono">
-                      {t.submitted_at ? formatDate(t.submitted_at) : '—'}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => {
-                          setSelectedTeam(t)
-                          setAdminNotes(t.admin_notes || '')
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-300 hover:text-white transition-colors text-[11px] font-semibold"
-                      >
-                        <Eye className="h-3 w-3" /> Review
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div className="glass-card p-12 text-center text-slate-500 text-sm">
+          <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
+          Loading registrations…
+        </div>
+      ) : grouped.length === 0 ? (
+        <div className="glass-card p-12 text-center text-slate-500 text-sm">
+          <ClipboardList className="h-10 w-10 text-slate-400 mx-auto mb-2" />
+          No registrations match the current filters.
+        </div>
+      ) : (
+        grouped.map(([university, universityTeams]) => {
+          const totalForUniversity = groups.find((g) => g.university === university)?.teams
+            ?? universityTeams.filter((t) => !t.is_removed).length
+          const soloForUniversity = groups.find((g) => g.university === university)?.solo
+            ?? universityTeams.filter((t) => t.is_solo || t.team_members?.length <= 1).length
+          const activeCount = totalForUniversity
+          const atLimit = activeCount >= maxTeams
+          return (
+            <section key={university} className="glass-card overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 py-4 bg-slate-50/80 border-b border-slate-200">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Building className="h-4 w-4 text-blue-600 shrink-0" />
+                  <h2 className="text-sm font-bold text-slate-900 truncate">{university}</h2>
+                  <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
+                    {universityTeams.length} shown
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className={`font-semibold px-2 py-0.5 rounded-full border ${
+                    atLimit ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  }`}>
+                    {activeCount} / {maxTeams} teams
+                  </span>
+                  <span className="text-slate-500">{soloForUniversity} solo</span>
+                </div>
+              </div>
 
-      {/* Review & Adjudication Modal */}
+              <div className="divide-y divide-slate-100">
+                {universityTeams.map((team) => {
+                  const members = team.team_members ?? []
+                  return (
+                    <div key={team.id} className="p-4 sm:p-5 hover:bg-slate-50/40 transition-colors">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-sm font-bold text-slate-900">{team.team_name}</h3>
+                            <span className={getTeamStatusColor(team.status)}>
+                              {TEAM_STATUS_LABELS[team.status] ?? team.status}
+                            </span>
+                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                              {team.is_solo || members.length === 1 ? 'Solo' : `${members.length} members`}
+                            </span>
+                            {team.is_removed && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
+                                Removed
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] font-mono text-blue-600 font-semibold mt-0.5">
+                            {team.registration_reference}
+                            <span className="text-slate-400 font-normal ml-2">
+                              {team.submitted_at ? formatDate(team.submitted_at) : '—'}
+                            </span>
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => openTeam(team)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold"
+                          >
+                            <Eye className="h-3 w-3" /> Manage
+                          </button>
+                          <button
+                            onClick={() => handleRemove(team)}
+                            disabled={actionLoading}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold disabled:opacity-50 ${
+                              team.is_removed
+                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200'
+                            }`}
+                          >
+                            {team.is_removed ? <><Undo2 className="h-3 w-3" /> Restore</> : <><Trash2 className="h-3 w-3" /> Remove</>}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {members.map((member) => (
+                          <div key={member.id} className="p-2.5 rounded-lg bg-white border border-slate-200">
+                            <div className="flex items-center gap-1.5">
+                              <UserRound className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                              <span className="text-xs font-semibold text-slate-900 truncate">{member.full_name}</span>
+                              {member.is_captain && (
+                                <span className="text-[9px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">LEADER</span>
+                              )}
+                            </div>
+                            <div className="mt-1 space-y-0.5 text-[10px] text-slate-500">
+                              <p className="flex items-center gap-1 truncate"><Mail className="h-3 w-3 shrink-0" /> {member.email || '—'}</p>
+                              <p className="flex items-center gap-1"><Hash className="h-3 w-3 shrink-0" /> @{member.username || '—'}</p>
+                              {member.student_id && <p className="flex items-center gap-1"><ClipboardList className="h-3 w-3 shrink-0" /> {member.student_id}</p>}
+                              {member.contact_phone && <p className="flex items-center gap-1"><Phone className="h-3 w-3 shrink-0" /> {member.contact_phone}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })
+      )}
+
       {selectedTeam && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-2xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto border-neutral-700">
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="glass-card max-w-2xl w-full p-6 sm:p-7 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-200">
               <div>
-                <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase block">
-                  {selectedTeam.registration_reference}
-                </span>
-                <h2 className="text-xl font-bold text-white">{selectedTeam.team_name}</h2>
+                <span className="text-[10px] font-mono text-blue-600 font-bold uppercase">{selectedTeam.registration_reference}</span>
+                <h2 className="text-xl font-bold text-slate-900">{selectedTeam.team_name}</h2>
+                <p className="text-xs text-slate-500">
+                  {selectedTeam.institution_name} · {selectedTeam.is_solo || selectedTeam.team_members.length === 1 ? 'Solo entry' : `${selectedTeam.team_members.length} members`}
+                </p>
               </div>
-              <button
-                onClick={() => setSelectedTeam(null)}
-                className="text-slate-400 hover:text-white text-lg p-1"
-              >
-                ✕
-              </button>
+              <button onClick={() => setSelectedTeam(null)} className="text-slate-500 hover:text-slate-900 text-lg p-1" aria-label="Close">✕</button>
             </div>
 
-            {/* University & Contact Details */}
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="p-3 rounded-lg bg-neutral-900/60 border border-neutral-800">
-                <span className="text-slate-500 block">Institution</span>
-                <span className="font-semibold text-white">{selectedTeam.institution_name}</span>
-                <span className="text-slate-400 block mt-0.5">{selectedTeam.campus || 'Main Campus'}</span>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Team Name</label>
+                <input
+                  className="form-input text-xs"
+                  value={editForm.teamName}
+                  onChange={(e) => setEditForm((f) => ({ ...f, teamName: e.target.value }))}
+                />
               </div>
-              <div className="p-3 rounded-lg bg-neutral-900/60 border border-neutral-800">
-                <span className="text-slate-500 block">Contact Information</span>
-                <span className="font-semibold text-white">{selectedTeam.contact_email}</span>
-                <span className="text-slate-400 block mt-0.5">{selectedTeam.contact_phone || 'No phone provided'}</span>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">University</label>
+                <input
+                  className="form-input text-xs"
+                  value={editForm.university}
+                  onChange={(e) => setEditForm((f) => ({ ...f, university: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Leader Email</label>
+                <input
+                  type="email"
+                  className="form-input text-xs"
+                  value={editForm.contactEmail}
+                  onChange={(e) => setEditForm((f) => ({ ...f, contactEmail: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Contact Phone</label>
+                <input
+                  className="form-input text-xs"
+                  value={editForm.contactPhone}
+                  onChange={(e) => setEditForm((f) => ({ ...f, contactPhone: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Campus</label>
+                <input
+                  className="form-input text-xs"
+                  value={editForm.campus}
+                  onChange={(e) => setEditForm((f) => ({ ...f, campus: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Region</label>
+                <input
+                  className="form-input text-xs"
+                  value={editForm.region}
+                  onChange={(e) => setEditForm((f) => ({ ...f, region: e.target.value }))}
+                />
               </div>
             </div>
 
-            {/* Members Roster */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                Team Roster ({selectedTeam.team_members?.length ?? 0} Students)
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5" /> Member Accounts
               </h3>
               <div className="space-y-2">
-                {(selectedTeam.team_members || []).map((m: any, idx: number) => (
-                  <div key={m.id || idx} className="p-3 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center justify-between text-xs">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white">{m.full_name}</span>
-                        {m.is_captain && (
-                          <span className="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-bold">
-                            CAPTAIN
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-slate-500 font-mono">ID: {m.student_id}</span>
+                {selectedTeam.team_members.map((m) => (
+                  <div key={m.id} className="p-3 rounded-lg bg-white border border-slate-200 text-xs">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-slate-900">{m.full_name}</span>
+                      {m.is_captain && <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">LEADER</span>}
+                      <span className="text-[10px] text-slate-500 capitalize">{m.account_status || 'active'}</span>
                     </div>
-                    <div className="text-right text-slate-400">
-                      <span>{m.degree_program || 'Student'}</span>
-                      <span className="text-slate-600 block text-[10px]">{m.semester ? `Semester ${m.semester}` : ''}</span>
+                    <div className="mt-1 grid sm:grid-cols-2 gap-1 text-[11px] text-slate-500">
+                      <span className="truncate">✉ {m.email || '—'}</span>
+                      <span className="font-mono">@{m.username || '—'}</span>
+                      <span>Reg. No: {m.student_id || '—'}</span>
+                      <span>Phone: {m.contact_phone || '—'}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Admin Notes Field */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Committee Notes / Rejection Reason / Waitlist Remarks:
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Committee Note / Reason (included in the member notification)
               </label>
               <textarea
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Notes visible to the captain or internal documentation..."
+                placeholder="Visible to the team leader and members…"
                 className="form-input text-xs w-full h-20"
               />
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-neutral-800">
-              <button
-                type="button"
-                onClick={() => setSelectedTeam(null)}
-                className="btn-ghost text-xs px-4 py-2"
-              >
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-slate-200">
+              <button type="button" onClick={() => setSelectedTeam(null)} className="btn-ghost text-xs px-4 py-2">
                 Close
               </button>
-
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   disabled={actionLoading}
-                  onClick={() => handleStatusChange(selectedTeam.id, 'waitlisted')}
-                  className="px-3.5 py-2 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-bold transition-colors"
+                  onClick={handleSaveEdit}
+                  className="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold inline-flex items-center gap-1"
                 >
-                  Waitlist
+                  <Save className="h-3.5 w-3.5" /> Save Details
                 </button>
-
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => handleStatusChange(selectedTeam.id, 'waitlisted')}
+                  className="px-3 py-2 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-bold inline-flex items-center gap-1"
+                >
+                  <AlertTriangle className="h-3.5 w-3.5" /> Waitlist
+                </button>
                 <button
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleStatusChange(selectedTeam.id, 'rejected')}
-                  className="px-3.5 py-2 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/40 text-xs font-bold transition-colors"
+                  className="px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs font-bold inline-flex items-center gap-1"
                 >
-                  Reject
+                  <XCircle className="h-3.5 w-3.5" /> Reject
                 </button>
-
                 <button
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleStatusChange(selectedTeam.id, 'approved')}
-                  className="btn-primary text-xs px-5 py-2 shadow-glow-sm"
+                  className="btn-primary text-xs px-4 py-2"
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                  Approve Team
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Approve
                 </button>
               </div>
             </div>

@@ -31,16 +31,16 @@ interface AuditLog {
 }
 
 const ACTION_COLORS: Record<string, string> = {
-  create: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  approve: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-  update: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
-  reject: 'bg-red-500/15 text-red-300 border-red-500/30',
-  disqualify: 'bg-red-600/20 text-red-300 border-red-600/40',
-  role_grant: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+  create: 'bg-emerald-500/15 text-emerald-700 border-emerald-200',
+  approve: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  update: 'bg-blue-500/15 text-blue-700 border-blue-500/30',
+  reject: 'bg-red-500/15 text-red-700 border-red-200',
+  disqualify: 'bg-red-600/20 text-red-700 border-red-600/40',
+  role_grant: 'bg-amber-100 text-amber-600 border-amber-500/40',
   role_revoke: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
-  score_override: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+  score_override: 'bg-purple-500/20 text-violet-600 border-purple-500/40',
   publish: 'bg-teal-500/15 text-teal-300 border-teal-500/30',
-  unpublish: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
+  unpublish: 'bg-slate-500/20 text-slate-600 border-slate-500/30',
 }
 
 export default function AuditLogsPage() {
@@ -91,7 +91,7 @@ export default function AuditLogsPage() {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(logs, null, 2))
     const downloadAnchor = document.createElement('a')
     downloadAnchor.setAttribute('href', dataStr)
-    downloadAnchor.setAttribute('download', `nexora_audit_logs_${new Date().toISOString().slice(0, 10)}.json`)
+    downloadAnchor.setAttribute('download', `vspark_audit_logs_${new Date().toISOString().slice(0, 10)}.json`)
     document.body.appendChild(downloadAnchor)
     downloadAnchor.click()
     downloadAnchor.remove()
@@ -101,13 +101,13 @@ export default function AuditLogsPage() {
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-12">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <ScrollText className="h-6 w-6 text-amber-400" />
-            <h1 className="text-2xl font-bold tracking-tight text-white">Security & Audit Logs</h1>
+            <ScrollText className="h-6 w-6 text-amber-600" />
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Security & Audit Logs</h1>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Immutable administrative trails recording state alterations, approvals, scoring overrides, and RBAC actions.
           </p>
         </div>
@@ -116,7 +116,7 @@ export default function AuditLogsPage() {
           <button
             type="button"
             onClick={fetchLogs}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-slate-300 hover:text-white hover:bg-neutral-800 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -125,7 +125,7 @@ export default function AuditLogsPage() {
             type="button"
             onClick={exportJSON}
             disabled={logs.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-50 border border-amber-500/20 text-xs font-semibold text-amber-600 hover:bg-amber-100 transition-colors disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
             Export Logs
@@ -142,7 +142,7 @@ export default function AuditLogsPage() {
             placeholder="Search email, action, entity..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-neutral-900/80 border border-neutral-800 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50/80 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
         </div>
 
@@ -150,7 +150,7 @@ export default function AuditLogsPage() {
           <select
             value={actionFilter}
             onChange={e => setActionFilter(e.target.value)}
-            className="w-full px-3 py-2 bg-neutral-900/80 border border-neutral-800 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-amber-500"
+            className="w-full px-3 py-2 bg-slate-50/80 border border-slate-200 rounded-lg text-sm text-slate-600 focus:outline-none focus:border-amber-500"
           >
             <option value="all">All Actions</option>
             <option value="create">create</option>
@@ -169,7 +169,7 @@ export default function AuditLogsPage() {
           <select
             value={entityFilter}
             onChange={e => setEntityFilter(e.target.value)}
-            className="w-full px-3 py-2 bg-neutral-900/80 border border-neutral-800 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-amber-500"
+            className="w-full px-3 py-2 bg-slate-50/80 border border-slate-200 rounded-lg text-sm text-slate-600 focus:outline-none focus:border-amber-500"
           >
             <option value="all">All Entity Types</option>
             <option value="teams">teams</option>
@@ -183,20 +183,20 @@ export default function AuditLogsPage() {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-neutral-900/50 border border-neutral-800/80 rounded-xl overflow-hidden backdrop-blur-sm">
+      <div className="bg-slate-50/50 border border-slate-200/80 rounded-xl overflow-hidden backdrop-blur-sm">
         {loading ? (
-          <div className="flex flex-col items-center justify-center p-12 text-slate-400 gap-3">
+          <div className="flex flex-col items-center justify-center p-12 text-slate-500 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
             <p className="text-sm">Querying audit logs...</p>
           </div>
         ) : filteredLogs.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">
+          <div className="p-12 text-center text-slate-500">
             <p className="text-sm">No audit logs recorded matching this criteria.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-neutral-950/80 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-neutral-800">
+              <thead className="bg-white/80 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                 <tr>
                   <th className="px-5 py-3.5">Timestamp</th>
                   <th className="px-5 py-3.5">Actor</th>
@@ -209,23 +209,23 @@ export default function AuditLogsPage() {
                 {filteredLogs.map(log => {
                   const badgeColor =
                     ACTION_COLORS[log.action] ||
-                    'bg-neutral-800 text-slate-300 border-neutral-700'
+                    'bg-slate-100 text-slate-600 border-slate-300'
                   return (
                     <tr
                       key={log.id}
                       onClick={() => setSelectedLog(log)}
                       className="hover:bg-neutral-850/50 transition-colors cursor-pointer group"
                     >
-                      <td className="px-5 py-3.5 text-slate-400 whitespace-nowrap">
+                      <td className="px-5 py-3.5 text-slate-500 whitespace-nowrap">
                         <div className="flex items-center gap-1.5 font-sans">
                           <Calendar className="h-3.5 w-3.5 text-slate-500" />
                           <span>{new Date(log.created_at).toLocaleString()}</span>
                         </div>
                       </td>
 
-                      <td className="px-5 py-3.5 text-slate-300 max-w-xs truncate">
+                      <td className="px-5 py-3.5 text-slate-600 max-w-xs truncate">
                         <div className="flex items-center gap-1.5 font-sans">
-                          <User className="h-3.5 w-3.5 text-amber-400/80" />
+                          <User className="h-3.5 w-3.5 text-amber-600/80" />
                           <span className="truncate">{log.actor_email || 'System / Batch'}</span>
                         </div>
                       </td>
@@ -238,13 +238,13 @@ export default function AuditLogsPage() {
                         </span>
                       </td>
 
-                      <td className="px-5 py-3.5 text-slate-300">
+                      <td className="px-5 py-3.5 text-slate-600">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-amber-300/90 font-sans">
+                          <span className="font-semibold text-amber-600/90 font-sans">
                             {log.entity_type}
                           </span>
                           {log.entity_id && (
-                            <span className="text-[10px] text-slate-500 bg-neutral-950 px-1.5 py-0.5 rounded border border-neutral-800 truncate max-w-[120px]">
+                            <span className="text-[10px] text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200 truncate max-w-[120px]">
                               {log.entity_id}
                             </span>
                           )}
@@ -254,7 +254,7 @@ export default function AuditLogsPage() {
                       <td className="px-5 py-3.5 text-right">
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 text-slate-400 group-hover:text-amber-400 transition-colors font-sans text-xs"
+                          className="inline-flex items-center gap-1 text-slate-500 group-hover:text-amber-600 transition-colors font-sans text-xs"
                         >
                           <Code2 className="h-3.5 w-3.5" />
                           <span>Diff</span>
@@ -273,39 +273,39 @@ export default function AuditLogsPage() {
       {/* Payload Diff Modal */}
       {selectedLog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 max-w-2xl w-full space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 max-w-2xl w-full space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <Code2 className="h-5 w-5 text-amber-400" />
-                <h3 className="text-base font-semibold text-white">Audit Event Payload</h3>
+                <Code2 className="h-5 w-5 text-amber-600" />
+                <h3 className="text-base font-semibold text-slate-900">Audit Event Payload</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-neutral-800"
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs bg-neutral-950 p-3 rounded-lg border border-neutral-800">
+            <div className="grid grid-cols-2 gap-3 text-xs bg-white p-3 rounded-lg border border-slate-200">
               <div>
                 <span className="text-slate-500 block">Actor:</span>
-                <span className="text-white font-medium">{selectedLog.actor_email || 'System'}</span>
+                <span className="text-slate-900 font-medium">{selectedLog.actor_email || 'System'}</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Timestamp:</span>
-                <span className="text-white font-medium">
+                <span className="text-slate-900 font-medium">
                   {new Date(selectedLog.created_at).toISOString()}
                 </span>
               </div>
               <div>
                 <span className="text-slate-500 block">Action:</span>
-                <span className="text-amber-400 font-semibold uppercase">{selectedLog.action}</span>
+                <span className="text-amber-600 font-semibold uppercase">{selectedLog.action}</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Target:</span>
-                <span className="text-indigo-300">
+                <span className="text-blue-600">
                   {selectedLog.entity_type} {selectedLog.entity_id ? `(${selectedLog.entity_id})` : ''}
                 </span>
               </div>
@@ -314,10 +314,10 @@ export default function AuditLogsPage() {
             <div className="flex-1 overflow-y-auto space-y-4 pr-1">
               {selectedLog.before_state && (
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  <h4 className="text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                     Before State:
                   </h4>
-                  <pre className="p-3 bg-neutral-950 rounded-lg border border-neutral-800 text-[11px] text-red-300 font-mono overflow-x-auto">
+                  <pre className="p-3 bg-white rounded-lg border border-slate-200 text-[11px] text-red-700 font-mono overflow-x-auto">
                     {JSON.stringify(selectedLog.before_state, null, 2)}
                   </pre>
                 </div>
@@ -325,10 +325,10 @@ export default function AuditLogsPage() {
 
               {selectedLog.after_state && (
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  <h4 className="text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                     After State / Recorded Payload:
                   </h4>
-                  <pre className="p-3 bg-neutral-950 rounded-lg border border-neutral-800 text-[11px] text-emerald-300 font-mono overflow-x-auto">
+                  <pre className="p-3 bg-white rounded-lg border border-slate-200 text-[11px] text-emerald-700 font-mono overflow-x-auto">
                     {JSON.stringify(selectedLog.after_state, null, 2)}
                   </pre>
                 </div>
@@ -336,21 +336,21 @@ export default function AuditLogsPage() {
 
               {selectedLog.metadata && (
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  <h4 className="text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                     Metadata:
                   </h4>
-                  <pre className="p-3 bg-neutral-950 rounded-lg border border-neutral-800 text-[11px] text-sky-300 font-mono overflow-x-auto">
+                  <pre className="p-3 bg-white rounded-lg border border-slate-200 text-[11px] text-sky-300 font-mono overflow-x-auto">
                     {JSON.stringify(selectedLog.metadata, null, 2)}
                   </pre>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-neutral-800">
+            <div className="flex justify-end pt-3 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs text-white font-medium transition-colors"
+                className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs text-slate-900 font-medium transition-colors"
               >
                 Close
               </button>

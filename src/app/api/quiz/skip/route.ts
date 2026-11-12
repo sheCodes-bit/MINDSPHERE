@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     const { data: attempt, error: attemptErr } = await supabase
       .from('quiz_attempts')
-      .select('*, teams!inner(captain_id), rounds(*)')
+      .select('*, rounds(*)')
       .eq('id', attemptId)
       .single()
 
@@ -25,8 +25,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Attempt not found' }, { status: 404 })
     }
 
-    if ((attempt.teams as any)?.captain_id !== user.id) {
-      return NextResponse.json({ error: 'Only the captain may manage the quiz' }, { status: 403 })
+    // Shared team attempt: any member of the current team may skip.
+    const { data: myTeamId } = await supabase.rpc('get_my_team_id')
+    if (!myTeamId || attempt.team_id !== myTeamId) {
+      return NextResponse.json({ error: 'You do not have access to this quiz attempt.' }, { status: 403 })
     }
 
     // ── Deadline check: refuse skip if attempt has expired ──────────────

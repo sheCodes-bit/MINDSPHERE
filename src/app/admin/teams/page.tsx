@@ -16,8 +16,8 @@ export default async function AdminTeamsPage() {
     <div className="space-y-6 max-w-7xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Teams Directory</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-black text-slate-900">Teams Directory</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Registered squads, institutional affiliations, and roster configurations.
           </p>
         </div>
@@ -40,7 +40,7 @@ export default async function AdminTeamsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-neutral-800 text-slate-400 bg-neutral-950/60 font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-slate-200 text-slate-500 bg-white/60 font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Ref</th>
                   <th className="py-3 px-4">Team Name</th>
                   <th className="py-3 px-4">Institution / Campus</th>
@@ -52,23 +52,23 @@ export default async function AdminTeamsPage() {
               </thead>
               <tbody className="divide-y divide-neutral-800/60">
                 {teams.map((t) => (
-                  <tr key={t.id} className="hover:bg-neutral-900/40 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-300">
+                  <tr key={t.id} className="hover:bg-slate-50/40 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-blue-600">
                       {t.registration_reference}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-white">
+                    <td className="py-3 px-4 font-semibold text-slate-900">
                       {t.team_name}
                     </td>
-                    <td className="py-3 px-4 text-slate-300">
-                      <div className="font-medium text-white">{t.institution_name}</div>
+                    <td className="py-3 px-4 text-slate-600">
+                      <div className="font-medium text-slate-900">{t.institution_name}</div>
                       <div className="text-[11px] text-slate-500">{t.campus || 'Main Campus'} • {t.region || '—'}</div>
                     </td>
-                    <td className="py-3 px-4 text-slate-400">
+                    <td className="py-3 px-4 text-slate-500">
                       <div className="truncate max-w-[160px]">{t.contact_email}</div>
                       {t.contact_phone && <div className="text-[10px] text-slate-500">{t.contact_phone}</div>}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="font-semibold text-white">
+                      <span className="font-semibold text-slate-900">
                         {t.team_members?.length ?? 0}
                       </span>
                       <span className="text-slate-500 ml-1">members</span>

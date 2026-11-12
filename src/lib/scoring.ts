@@ -1,5 +1,5 @@
 /**
- * NEXORA Competition Scoring & Qualification Engine
+ * COMSATS VSPARK Competition Scoring & Qualification Engine
  * Official rules implementation
  */
 
@@ -197,7 +197,7 @@ export function evaluateRound4Champion(ranked: RankedTeamEntry[]): RankedTeamEnt
       return {
         ...team,
         isQualified: true,
-        qualificationNotes: 'Grand Champion — Winner of NEXORA',
+        qualificationNotes: 'Grand Champion — Winner of COMSATS VSPARK',
       }
     }
     return {

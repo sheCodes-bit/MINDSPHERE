@@ -11,14 +11,34 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const roundNumber = Number(body.roundNumber || 1)
 
-    // 1. Get user's team
-    const { data: team, error: teamError } = await supabase
-      .from('teams')
-      .select('id, team_name, registration_reference, status')
-      .eq('captain_id', user.id)
+    // 1. Resolve the user's team as ANY member (leader or teammate).
+    const { data: membership } = await supabase
+      .from('team_members')
+      .select('team_id')
+      .eq('user_id', user.id)
       .maybeSingle()
 
-    if (teamError || !team) {
+    let team: { id: string; team_name: string; registration_reference: string; status: string } | null = null
+    if (membership?.team_id) {
+      const { data } = await supabase
+        .from('teams')
+        .select('id, team_name, registration_reference, status, is_removed')
+        .eq('id', membership.team_id)
+        .eq('is_removed', false)
+        .maybeSingle()
+      team = data
+    }
+    if (!team) {
+      const { data } = await supabase
+        .from('teams')
+        .select('id, team_name, registration_reference, status, is_removed')
+        .eq('captain_id', user.id)
+        .eq('is_removed', false)
+        .maybeSingle()
+      team = data
+    }
+
+    if (!team) {
       return NextResponse.json({ error: 'No registered team found for your account.' }, { status: 404 })
     }
 
@@ -138,31 +158,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: attemptCreateErr?.message || 'Failed to start quiz attempt' }, { status: 500 })
     }
 
-    // 5. Select question versions for this attempt
-    // Fetch latest versions of published questions
-    const { data: questions } = await supabase
-      .from('questions')
-      .select('id, question_versions!inner(*)')
-      .eq('status', 'published')
-      .order('version', { foreignTable: 'question_versions', ascending: false })
-      .limit(questionLimit * 3)
+    // 5. Select question versions assigned to this round
+    // Participants only receive questions specifically assigned to their current round.
+    const { data: roundQuestions, error: rqError } = await supabase
+      .from('round_questions')
+      .select('id, question_id, question_version_id, questions(status), question_versions(id, question_text, difficulty, options_snapshot)')
+      .eq('round_id', round.id)
+      .neq('questions.status', 'archived')
+      .order('display_order', { ascending: true })
 
-    if (!questions || questions.length === 0) {
+    if (rqError || !roundQuestions || roundQuestions.length === 0) {
       await supabase.from('quiz_attempts').delete().eq('id', newAttempt.id)
-      return NextResponse.json({ error: 'No active questions configured in question bank for this round.' }, { status: 500 })
+      return NextResponse.json({ error: 'No questions assigned to this round yet.' }, { status: 500 })
     }
 
     // Shuffle and pick
-    const shuffled = [...questions].sort(() => 0.5 - Math.random()).slice(0, questionLimit)
+    const shuffled = [...roundQuestions].sort(() => 0.5 - Math.random()).slice(0, questionLimit)
 
-    const attemptQuestionsToInsert = shuffled.map((q, idx) => {
-      const latestVer = Array.isArray(q.question_versions) ? q.question_versions[0] : q.question_versions
-      return {
-        attempt_id: newAttempt.id,
-        question_version_id: latestVer.id,
-        display_order: idx + 1,
-      }
-    })
+    const attemptQuestionsToInsert = shuffled
+      .filter((rq) => !!rq.question_version_id)
+      .map((rq, idx) => {
+        return {
+          attempt_id: newAttempt.id,
+          question_version_id: rq.question_version_id!,
+          display_order: idx + 1,
+        }
+      })
 
     const { data: insertedAQs, error: aqErr } = await supabase
       .from('attempt_questions')

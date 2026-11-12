@@ -11,11 +11,12 @@ export const metadata: Metadata = {
   description: BRAND_CONFIG.fullDescription,
   keywords: [
     BRAND_CONFIG.name,
-    "Regional Computing Challenge",
+    "COMSATS VSPARK Quiz Competition",
+    "COMSATS University Islamabad",
     "university computing competition",
     "CS quiz competition",
     "programming challenge",
-    "computer science regional competition",
+    "computer science competition",
     "algorithmic competition",
   ],
   openGraph: {
@@ -37,13 +38,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head />
-      <body className="font-sans antialiased bg-deep text-white min-h-screen selection:bg-indigo-600/30 selection:text-white">
+      <body className="font-sans antialiased bg-deep text-slate-900 min-h-screen selection:bg-blue-600/20 selection:text-slate-900">
         <div className="relative min-h-screen">
           {children}
         </div>
-        <Toaster position="top-right" richColors theme="dark" />
+        <Toaster position="top-right" richColors theme="light" />
       </body>
     </html>
   );

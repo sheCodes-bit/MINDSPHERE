@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(csv, {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="nexora_questions_${new Date().toISOString().slice(0, 10)}.csv"`,
+        'Content-Disposition': `attachment; filename="vspark_questions_${new Date().toISOString().slice(0, 10)}.csv"`,
       },
     })
   } catch (err) {

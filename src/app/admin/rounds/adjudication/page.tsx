@@ -255,23 +255,23 @@ export default function AdminAdjudicationPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
-            <Radio className="h-6 w-6 text-amber-400" />
+          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2.5">
+            <Radio className="h-6 w-6 text-amber-600" />
             Physical Adjudication Console
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Official jury control console for manually conducted physical rounds (Round 3 Rapid Fire &amp; Round 4 Buzzer Final).
           </p>
         </div>
 
         {/* Tab switch */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-neutral-900 border border-neutral-800 self-start sm:self-auto">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-50 border border-slate-200 self-start sm:self-auto">
           <button
             onClick={() => setActiveTab('rapid_fire')}
             className={`text-xs px-4 py-2 rounded-lg font-bold transition-colors ${
               activeTab === 'rapid_fire'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-100 text-amber-600 border border-amber-500/40'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Round 3: Rapid Fire
@@ -280,8 +280,8 @@ export default function AdminAdjudicationPage() {
             onClick={() => setActiveTab('buzzer')}
             className={`text-xs px-4 py-2 rounded-lg font-bold transition-colors ${
               activeTab === 'buzzer'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-100 text-amber-600 border border-amber-500/40'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Round 4: Buzzer Final
@@ -297,13 +297,13 @@ export default function AdminAdjudicationPage() {
             <div className="glass-card p-6 sm:p-8 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">
                     Select Competing Team
                   </label>
                   <select
                     value={selectedTeamId}
                     onChange={(e) => setSelectedTeamId(e.target.value)}
-                    className="form-input text-xs w-64 bg-neutral-900 font-bold text-white"
+                    className="form-input text-xs w-64 bg-slate-50 font-bold text-slate-900"
                   >
                     {teams.map((t) => (
                       <option key={t.id} value={t.id}>
@@ -351,22 +351,22 @@ export default function AdminAdjudicationPage() {
 
               {/* Master 3m Clock & 3s Question Clock */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 text-center">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">
+                <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 text-center">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1">
                     Team Master Clock
                   </span>
-                  <div className="text-4xl sm:text-5xl font-black font-mono text-white tracking-wider">
+                  <div className="text-4xl sm:text-5xl font-black font-mono text-slate-900 tracking-wider">
                     {formattedRapidTime}
                   </div>
                   <span className="text-[11px] text-slate-500 mt-1 block">Configurable: 180s total</span>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 text-center">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">
+                <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 text-center">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1">
                     Question Skip Clock
                   </span>
                   <div className={`text-4xl sm:text-5xl font-black font-mono ${
-                    questionTimeLeft <= 1 ? 'text-red-400 animate-ping' : 'text-amber-400'
+                    questionTimeLeft <= 1 ? 'text-red-600 animate-ping' : 'text-amber-600'
                   }`}>
                     00:0{questionTimeLeft}
                   </div>
@@ -375,20 +375,20 @@ export default function AdminAdjudicationPage() {
               </div>
 
               {/* Live Tally Bar */}
-              <div className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 flex items-center justify-around text-center text-xs">
+              <div className="p-4 rounded-xl bg-white/60 border border-slate-200 flex items-center justify-around text-center text-xs">
                 <div>
                   <span className="text-slate-500 block">Total Questions</span>
-                  <span className="text-xl font-bold font-mono text-white">{rapidFireCount}</span>
+                  <span className="text-xl font-bold font-mono text-slate-900">{rapidFireCount}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Score</span>
-                  <span className="text-xl font-bold font-mono text-emerald-400">+{rapidFireScore} pts</span>
+                  <span className="text-xl font-bold font-mono text-emerald-600">+{rapidFireScore} pts</span>
                 </div>
               </div>
 
               {/* Instant Adjudication Controls */}
               <div className="space-y-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
                   Live Answer Judgement
                 </span>
                 <div className="grid grid-cols-3 gap-3">
@@ -402,7 +402,7 @@ export default function AdminAdjudicationPage() {
 
                   <button
                     onClick={() => handleRapidFireOutcome('skip')}
-                    className="p-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold text-sm flex flex-col items-center gap-1 border border-neutral-700 transition-transform active:scale-95"
+                    className="p-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-amber-600 font-bold text-sm flex flex-col items-center gap-1 border border-slate-300 transition-transform active:scale-95"
                   >
                     <RotateCcw className="h-6 w-6" />
                     <span>SKIP (0)</span>
@@ -410,7 +410,7 @@ export default function AdminAdjudicationPage() {
 
                   <button
                     onClick={() => handleRapidFireOutcome('incorrect')}
-                    className="p-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-red-400 font-bold text-sm flex flex-col items-center gap-1 border border-neutral-700 transition-transform active:scale-95"
+                    className="p-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-red-600 font-bold text-sm flex flex-col items-center gap-1 border border-slate-300 transition-transform active:scale-95"
                   >
                     <XCircle className="h-6 w-6" />
                     <span>INCORRECT (0)</span>
@@ -422,7 +422,7 @@ export default function AdminAdjudicationPage() {
 
           {/* Activity Log */}
           <div className="glass-card p-6 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 pb-3 border-b border-neutral-800">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 pb-3 border-b border-slate-200">
               Live Scoring Event Log
             </h2>
             <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
@@ -430,10 +430,10 @@ export default function AdminAdjudicationPage() {
                 <p className="text-xs text-slate-500 text-center py-6">No scoring events yet.</p>
               ) : (
                 scoringEvents.map((ev) => (
-                  <div key={ev.id} className="p-2.5 rounded-lg bg-neutral-900/60 border border-neutral-800 text-xs">
+                  <div key={ev.id} className="p-2.5 rounded-lg bg-slate-50/60 border border-slate-200 text-xs">
                     <div className="flex items-center justify-between font-semibold">
-                      <span className="text-white truncate max-w-[140px]">{ev.teams?.team_name || 'Team'}</span>
-                      <span className={`font-mono font-bold ${ev.score_delta > 0 ? 'text-emerald-400' : ev.score_delta < 0 ? 'text-red-400' : 'text-slate-400'}`}>
+                      <span className="text-slate-900 truncate max-w-[140px]">{ev.teams?.team_name || 'Team'}</span>
+                      <span className={`font-mono font-bold ${ev.score_delta > 0 ? 'text-emerald-600' : ev.score_delta < 0 ? 'text-red-600' : 'text-slate-500'}`}>
                         {ev.score_delta > 0 ? `+${ev.score_delta}` : ev.score_delta}
                       </span>
                     </div>
@@ -451,12 +451,12 @@ export default function AdminAdjudicationPage() {
         <div className="space-y-6">
           {/* Competitors Selectors */}
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="glass-card p-5 space-y-2 border-indigo-500/30">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Team Alpha</span>
+            <div className="glass-card p-5 space-y-2 border-blue-200/30">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Team Alpha</span>
               <select
                 value={buzzerTeamA}
                 onChange={(e) => setBuzzerTeamA(e.target.value)}
-                className="form-input text-xs w-full bg-neutral-900 font-bold text-white"
+                className="form-input text-xs w-full bg-slate-50 font-bold text-slate-900"
               >
                 {teams.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -464,17 +464,17 @@ export default function AdminAdjudicationPage() {
                   </option>
                 ))}
               </select>
-              <div className="text-2xl font-black font-mono text-indigo-400 pt-1">
+              <div className="text-2xl font-black font-mono text-blue-600 pt-1">
                 Score: {scoreTeamA} pts
               </div>
             </div>
 
             <div className="glass-card p-5 space-y-2 border-purple-500/30">
-              <span className="text-xs font-bold uppercase tracking-wider text-purple-400">Team Beta</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-violet-600">Team Beta</span>
               <select
                 value={buzzerTeamB}
                 onChange={(e) => setBuzzerTeamB(e.target.value)}
-                className="form-input text-xs w-full bg-neutral-900 font-bold text-white"
+                className="form-input text-xs w-full bg-slate-50 font-bold text-slate-900"
               >
                 {teams.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -482,7 +482,7 @@ export default function AdminAdjudicationPage() {
                   </option>
                 ))}
               </select>
-              <div className="text-2xl font-black font-mono text-purple-400 pt-1">
+              <div className="text-2xl font-black font-mono text-violet-600 pt-1">
                 Score: {scoreTeamB} pts
               </div>
             </div>
@@ -491,9 +491,9 @@ export default function AdminAdjudicationPage() {
           {/* Buzzer Trigger Panel */}
           <div className="glass-card p-6 sm:p-8 space-y-6 text-center">
             <div className="flex items-center justify-center gap-3">
-              <span className="text-xs text-slate-400">10-Second Buzzer Answering Clock:</span>
+              <span className="text-xs text-slate-500">10-Second Buzzer Answering Clock:</span>
               <span className={`text-2xl font-black font-mono px-3 py-1 rounded-lg border ${
-                buzzerTimerRunning ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse' : 'bg-neutral-900 text-slate-500 border-neutral-800'
+                buzzerTimerRunning ? 'bg-amber-100 text-amber-600 border-amber-500/40 animate-pulse' : 'bg-slate-50 text-slate-500 border-slate-200'
               }`}>
                 00:{String(buzzerTimer).padStart(2, '0')}
               </span>
@@ -506,13 +506,13 @@ export default function AdminAdjudicationPage() {
                 onClick={() => handleTriggerBuzzer(buzzerTeamA)}
                 className={`p-8 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 ${
                   activeBuzzerTeam === buzzerTeamA
-                    ? 'bg-indigo-600 border-white text-white shadow-glow-lg scale-102 ring-4 ring-indigo-500/50'
-                    : 'bg-neutral-900 border-indigo-500/40 hover:border-indigo-400 text-white'
+                    ? 'bg-blue-600 border-white text-white shadow-glow-lg scale-102 ring-4 ring-blue-500/50'
+                    : 'bg-slate-50 border-blue-200/40 hover:border-blue-300 text-slate-900'
                 }`}
               >
-                <Zap className="h-8 w-8 text-amber-400" />
+                <Zap className="h-8 w-8 text-amber-600" />
                 <span className="text-lg font-black uppercase">BUZZ IN: TEAM ALPHA</span>
-                <span className="text-xs text-slate-400">Record First Press</span>
+                <span className="text-xs text-slate-500">Record First Press</span>
               </button>
 
               <button
@@ -520,20 +520,20 @@ export default function AdminAdjudicationPage() {
                 onClick={() => handleTriggerBuzzer(buzzerTeamB)}
                 className={`p-8 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 ${
                   activeBuzzerTeam === buzzerTeamB
-                    ? 'bg-purple-600 border-white text-white shadow-glow-lg scale-102 ring-4 ring-purple-500/50'
-                    : 'bg-neutral-900 border-purple-500/40 hover:border-purple-400 text-white'
+                    ? 'bg-violet-600 border-white text-white shadow-glow-lg scale-102 ring-4 ring-purple-500/50'
+                    : 'bg-slate-50 border-purple-500/40 hover:border-purple-400 text-slate-900'
                 }`}
               >
-                <Zap className="h-8 w-8 text-amber-400" />
+                <Zap className="h-8 w-8 text-amber-600" />
                 <span className="text-lg font-black uppercase">BUZZ IN: TEAM BETA</span>
-                <span className="text-xs text-slate-400">Record First Press</span>
+                <span className="text-xs text-slate-500">Record First Press</span>
               </button>
             </div>
 
             {/* Adjudication Action Buttons */}
             {activeBuzzerTeam && (
-              <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-300 block">
+              <div className="p-6 rounded-2xl bg-amber-50 border border-amber-200 space-y-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 block">
                   Active Responder Answering... Adjudicate Result:
                 </span>
 
@@ -556,7 +556,7 @@ export default function AdminAdjudicationPage() {
 
                   <button
                     onClick={() => handleBuzzerAdjudication('pass')}
-                    className="p-3.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-slate-300 font-bold text-xs flex flex-col items-center gap-1 border border-neutral-700"
+                    className="p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex flex-col items-center gap-1 border border-slate-300"
                   >
                     <RotateCcw className="h-5 w-5" />
                     <span>PASS TURN (0)</span>
@@ -564,7 +564,7 @@ export default function AdminAdjudicationPage() {
 
                   <button
                     onClick={() => handleBuzzerAdjudication('penalty')}
-                    className="p-3.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-amber-400 font-bold text-xs flex flex-col items-center gap-1 border border-neutral-700"
+                    className="p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-amber-600 font-bold text-xs flex flex-col items-center gap-1 border border-slate-300"
                   >
                     <AlertTriangle className="h-5 w-5" />
                     <span>PREMATURE BUZZ (-0.5)</span>

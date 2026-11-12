@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import Papa from 'papaparse'
 import { generateRegistrationRef, formatTimeLeft, getTeamStatusColor } from '@/lib/utils'
 import { getDevelopers, BRAND_CONFIG } from '@/config/branding'
@@ -12,12 +12,12 @@ import {
 } from '@/lib/scoring'
 import { teamRegistrationSchema, questionSchema } from '@/lib/validations/schemas'
 
-describe('NEXORA Integration & Business Logic Suite', () => {
+describe('COMSATS VSPARK Integration & Business Logic Suite', () => {
   // ── 1. Branding & Developer Attribution Verification ─────────────────────
   describe('Branding & Mandatory Developer Attribution', () => {
     it('provides correct brand name and academic competition title', () => {
-      expect(BRAND_CONFIG.name).toBe('NEXORA')
-      expect(BRAND_CONFIG.subtitle).toBe('THE REGIONAL COMPUTING CHALLENGE')
+      expect(BRAND_CONFIG.name).toBe('COMSATS VSPARK')
+      expect(BRAND_CONFIG.subtitle).toBe('QUIZ COMPETITION')
       expect(BRAND_CONFIG.tagline).toBe('Challenge your knowledge. Prove your intelligence.')
     })
 
@@ -44,10 +44,10 @@ describe('NEXORA Integration & Business Logic Suite', () => {
 
   // ── 2. Registration Reference Generation ─────────────────────────────────
   describe('Registration Reference Generation', () => {
-    it('generates registration reference with format NEX-YYYY-XXXXX', () => {
+    it('generates registration reference with format VSPARK-YYYY-XXXXX', () => {
       const ref = generateRegistrationRef()
       const currentYear = new Date().getFullYear().toString()
-      const pattern = new RegExp(`^NEX-${currentYear}-\\d{5}$`)
+      const pattern = new RegExp(`^VSPARK-${currentYear}-\\d{5}$`)
       expect(pattern.test(ref)).toBe(true)
     })
 
@@ -169,7 +169,7 @@ Operating Systems,Which scheduling algorithm is non-preemptive?,Round Robin,Shor
     const registeredTeams: TeamScoreEntry[] = Array.from({ length: 10 }, (_, i) => ({
       teamId: `team-${i + 1}`,
       teamName: `Team ${String.fromCharCode(65 + i)}`,
-      registrationReference: `NEX-2026-${String(i + 1).padStart(5, '0')}`,
+      registrationReference: `VSPARK-2026-${String(i + 1).padStart(5, '0')}`,
       totalScore: 0,
     }))
 
@@ -198,7 +198,7 @@ Operating Systems,Which scheduling algorithm is non-preemptive?,Round Robin,Shor
       const r2Teams: TeamScoreEntry[] = Array.from({ length: 8 }, (_, i) => ({
         teamId: `team-${i + 1}`,
         teamName: `Team ${String.fromCharCode(65 + i)}`,
-        registrationReference: `NEX-2026-${String(i + 1).padStart(5, '0')}`,
+        registrationReference: `VSPARK-2026-${String(i + 1).padStart(5, '0')}`,
         totalScore: round2Scores[i],
       }))
 
@@ -214,10 +214,10 @@ Operating Systems,Which scheduling algorithm is non-preemptive?,Round Robin,Shor
     it('simulates Round 3: Rapid Fire (3m master clock, 3s auto-skip), top 2 advance to Final', () => {
       // Top 4 teams from Round 2
       const round3Teams: TeamScoreEntry[] = [
-        { teamId: 'team-1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 18 },
-        { teamId: 'team-2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 14 },
-        { teamId: 'team-3', teamName: 'Team C', registrationReference: 'NEX-2026-00003', totalScore: 11 },
-        { teamId: 'team-4', teamName: 'Team D', registrationReference: 'NEX-2026-00004', totalScore: 9 },
+        { teamId: 'team-1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 18 },
+        { teamId: 'team-2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 14 },
+        { teamId: 'team-3', teamName: 'Team C', registrationReference: 'VSPARK-2026-00003', totalScore: 11 },
+        { teamId: 'team-4', teamName: 'Team D', registrationReference: 'VSPARK-2026-00004', totalScore: 9 },
       ]
 
       const ranked = rankTeams(round3Teams)
@@ -234,8 +234,8 @@ Operating Systems,Which scheduling algorithm is non-preemptive?,Round Robin,Shor
       // Team A: 7 correct (+7.0), 1 incorrect (-0.5) = 6.5
       // Team B: 5 correct (+5.0), 2 incorrect (-1.0) = 4.0
       const finalTeams: TeamScoreEntry[] = [
-        { teamId: 'team-1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 6.5 },
-        { teamId: 'team-2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 4.0 },
+        { teamId: 'team-1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 6.5 },
+        { teamId: 'team-2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 4.0 },
       ]
 
       const ranked = rankTeams(finalTeams)
@@ -252,8 +252,8 @@ Operating Systems,Which scheduling algorithm is non-preemptive?,Round Robin,Shor
 
     it('handles Round 4 tie and triggers sudden-death tiebreaker note', () => {
       const tiedFinalTeams: TeamScoreEntry[] = [
-        { teamId: 'team-1', teamName: 'Team A', registrationReference: 'NEX-2026-00001', totalScore: 5.0 },
-        { teamId: 'team-2', teamName: 'Team B', registrationReference: 'NEX-2026-00002', totalScore: 5.0 },
+        { teamId: 'team-1', teamName: 'Team A', registrationReference: 'VSPARK-2026-00001', totalScore: 5.0 },
+        { teamId: 'team-2', teamName: 'Team B', registrationReference: 'VSPARK-2026-00002', totalScore: 5.0 },
       ]
 
       const ranked = rankTeams(tiedFinalTeams)
@@ -279,6 +279,8 @@ Operating Systems,Which scheduling algorithm is non-preemptive?,Round Robin,Shor
     })
 
     it('formats countdown timer accurately', () => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
       const now = new Date()
       const future = new Date(now.getTime() + 125 * 1000) // 2 minutes 5 seconds
       const formatted = formatTimeLeft(future)
@@ -286,6 +288,7 @@ Operating Systems,Which scheduling algorithm is non-preemptive?,Round Robin,Shor
 
       const past = new Date(now.getTime() - 10000)
       expect(formatTimeLeft(past)).toBe('00:00')
+      vi.useRealTimers()
     })
   })
 })

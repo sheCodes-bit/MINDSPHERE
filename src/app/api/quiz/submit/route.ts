@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // 1. Verify team ownership of attempt
     const { data: attempt, error: attemptErr } = await supabase
       .from('quiz_attempts')
-      .select('*, teams!inner(captain_id), rounds(*)')
+      .select('*, rounds(*)')
       .eq('id', attemptId)
       .single()
 
@@ -26,8 +26,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Attempt not found' }, { status: 404 })
     }
 
-    if ((attempt.teams as any)?.captain_id !== user.id) {
-      return NextResponse.json({ error: 'Only the team captain may submit quiz answers' }, { status: 403 })
+    // Any member of the owning team may act for the team; RLS + this check
+    // ensure the attempt belongs to the caller's current team.
+    const { data: myTeamId } = await supabase.rpc('get_my_team_id')
+    if (!myTeamId || attempt.team_id !== myTeamId) {
+      return NextResponse.json({ error: 'You do not have access to this quiz attempt.' }, { status: 403 })
+    }
+
+    // The submitted question must belong to this attempt.
+    const { data: ownedQuestion } = await supabase
+      .from('attempt_questions')
+      .select('id')
+      .eq('id', attemptQuestionId)
+      .eq('attempt_id', attemptId)
+      .maybeSingle()
+    if (!ownedQuestion) {
+      return NextResponse.json({ error: 'Question not found in this attempt.' }, { status: 404 })
     }
 
     if (attempt.status !== 'in_progress') {

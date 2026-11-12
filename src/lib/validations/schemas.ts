@@ -1,8 +1,16 @@
 import { z } from 'zod'
 
+export const usernameSchema = z
+  .string()
+  .min(3, 'Username must be at least 3 characters')
+  .max(32, 'Username cannot exceed 32 characters')
+  .regex(/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/, 'Use letters, numbers, dots, dashes or underscores')
+  .transform((value) => value.trim().toLowerCase())
+
 export const signUpSchema = z.object({
   full_name: z.string().min(2, 'Full name must be at least 2 characters').max(100, 'Name too long').trim(),
   email: z.string().email('Please enter a valid email address').toLowerCase().trim(),
+  username: usernameSchema.optional(),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
@@ -15,6 +23,12 @@ export const signUpSchema = z.object({
 
 export const signInSchema = z.object({
   email: z.string().email('Please enter a valid email address').toLowerCase().trim(),
+  password: z.string().min(1, 'Password is required'),
+})
+
+/** Username OR email login. */
+export const loginSchema = z.object({
+  identifier: z.string().min(3, 'Enter your username or email').max(120).trim(),
   password: z.string().min(1, 'Password is required'),
 })
 
@@ -33,6 +47,7 @@ export const resetPasswordSchema = z.object({
   path: ['confirm_password'],
 })
 
+// ── Legacy team registration schema (kept for existing data/back-compat) ──
 const memberSchema = z.object({
   full_name: z.string().min(2, 'Name must be at least 2 characters').trim(),
   student_id: z.string().min(3, 'Student ID is required').trim(),
@@ -60,6 +75,50 @@ export const teamRegistrationStep2Schema = z.object({
 export const teamRegistrationSchema = teamRegistrationStep1Schema.merge(
   z.object({ members: teamRegistrationStep2Schema.shape.members })
 )
+
+// ── Phase 2 registration schema: solo or 1–3 members with own accounts ──
+export const teamMemberV2Schema = z.object({
+  full_name: z.string().min(2, 'Member name is required').max(100).trim(),
+  email: z.string().email('A valid email is required for each member').toLowerCase().trim(),
+  username: usernameSchema,
+  student_id: z.string().max(40).trim().optional().or(z.literal('')),
+  contact_phone: z.string().max(30).trim().optional().or(z.literal('')),
+  is_leader: z.boolean().optional(),
+})
+
+export const teamRegistrationV2Schema = z.object({
+  team_name: z.string().min(2, 'Team name must be at least 2 characters').max(80, 'Team name too long').trim(),
+  university: z.string().min(2, 'Please select your university').max(160).trim(),
+  campus: z.string().max(120).trim().optional().or(z.literal('')),
+  region: z.string().max(120).trim().optional().or(z.literal('')),
+  contact_phone: z.string().max(30).trim().optional().or(z.literal('')),
+  notes: z.string().max(500).trim().optional().or(z.literal('')),
+  members: z.array(teamMemberV2Schema)
+    .min(1, 'A team must have at least 1 member')
+    .max(3, 'A team cannot exceed 3 members'),
+}).superRefine((data, ctx) => {
+  const emails = data.members.map((m) => m.email.toLowerCase())
+  if (new Set(emails).size !== emails.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['members'], message: 'Each member needs a different email address.' })
+  }
+  const usernames = data.members.map((m) => m.username.toLowerCase())
+  if (new Set(usernames).size !== usernames.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['members'], message: 'Each member needs a unique username.' })
+  }
+  const leaders = data.members.filter((m) => m.is_leader)
+  if (leaders.length !== 1) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['members'], message: 'Exactly one member must be the team leader.' })
+  }
+})
+
+export const teamUpdateV2Schema = z.object({
+  team_name: z.string().min(2).max(80).trim().optional(),
+  university: z.string().min(2).max(160).trim().optional(),
+  campus: z.string().max(120).trim().optional().or(z.literal('')),
+  region: z.string().max(120).trim().optional().or(z.literal('')),
+  contact_phone: z.string().max(30).trim().optional().or(z.literal('')),
+  notes: z.string().max(500).trim().optional().or(z.literal('')),
+})
 
 export const questionSchema = z.object({
   subject_id: z.string().uuid('Please select a subject'),
@@ -95,8 +154,11 @@ export const competitionSettingSchema = z.object({
 
 export type SignUpInput = z.infer<typeof signUpSchema>
 export type SignInInput = z.infer<typeof signInSchema>
+export type LoginInput = z.infer<typeof loginSchema>
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 export type TeamRegistrationInput = z.infer<typeof teamRegistrationSchema>
+export type TeamRegistrationV2Input = z.infer<typeof teamRegistrationV2Schema>
+export type TeamMemberV2Input = z.infer<typeof teamMemberV2Schema>
 export type QuestionInput = z.infer<typeof questionSchema>
 export type AnnouncementInput = z.infer<typeof announcementSchema>

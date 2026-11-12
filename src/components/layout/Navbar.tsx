@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, Cpu, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BRAND_CONFIG } from "@/config/branding";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -13,8 +13,12 @@ const NAV_LINKS = [
   { href: "/#subjects", label: "Subjects" },
   { href: "/#rounds", label: "Rounds" },
   { href: "/#rules", label: "Rules" },
-  { href: "/announcements", label: "Announcements" },
   { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/practice", label: "Practice" },
+];
+
+const MOBILE_EXTRA = [
+  { href: "/announcements", label: "Announcements" },
   { href: "/#faq", label: "FAQ" },
 ];
 
@@ -24,129 +28,101 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 16);
+    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
 
   const isHome = pathname === "/";
+  const onDark = isHome && !isScrolled && !isMenuOpen;
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
-        isScrolled
-          ? "bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800"
-          : "bg-transparent"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        isScrolled || isMenuOpen ? "header-glass" : isHome ? "bg-transparent" : "header-glass"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4">
-          {/* Brand */}
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 group shrink-0"
-            aria-label={`${BRAND_CONFIG.name} — Home`}
-          >
-            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 flex items-center justify-center shadow-glow-sm group-hover:shadow-glow-md transition-all duration-300 group-hover:scale-105">
-              <Cpu className="h-5 w-5 text-white" aria-hidden />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-extrabold tracking-wider text-white">
-                NEX<span className="text-indigo-400">ORA</span>
-              </span>
-              <span className="text-[9px] font-semibold tracking-widest text-slate-400 uppercase -mt-1 hidden sm:inline">
-                Regional Challenge
-              </span>
-            </div>
-          </Link>
+        <div className="flex h-16 md:h-20 items-center justify-between gap-4">
+          <BrandLogo priority imgClassName="h-9 md:h-11" />
 
-          {/* Desktop nav */}
-          <nav
-            className="hidden lg:flex items-center nav-pill"
-            aria-label="Main navigation"
-          >
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "nav-link",
-                  (isHome && link.href === "/") || pathname === link.href
-                    ? "active"
-                    : ""
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2" aria-label="Main navigation">
+            {NAV_LINKS.map((link) => {
+              const active = link.href === "/" ? pathname === "/" : pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "rounded-full px-3.5 py-2 text-sm font-medium transition-colors duration-150",
+                    onDark
+                      ? "text-white/85 hover:text-white hover:bg-white/10"
+                      : "text-slate-600 hover:text-blue-700 hover:bg-blue-50",
+                    active && (onDark ? "text-white bg-white/15" : "text-blue-700 bg-blue-50")
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Desktop CTA */}
           <div className="hidden sm:flex items-center gap-3 shrink-0">
-            <Link href="/login" className="btn-ghost !px-4 !py-2 text-sm">
-              Sign In
+            <Link
+              href="/login"
+              className={cn(
+                "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold border transition-all duration-200",
+                onDark
+                  ? "text-white border-white/40 hover:bg-white/10"
+                  : "text-slate-700 border-slate-300 bg-white/70 hover:bg-white hover:border-slate-400"
+              )}
+            >
+              Log in
             </Link>
-            <Link href="/register" className="btn-gradient-border">
-              <span className="flex items-center gap-1.5 text-sm font-semibold">
-                Register Team
-                <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-              </span>
+            <Link href="/register" className="btn-primary !px-5 !py-2.5 text-sm">
+              Register Now
+              <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
 
-          {/* Mobile menu button */}
           <button
             type="button"
-            className="flex lg:hidden items-center justify-center h-9 w-9 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+            className={cn(
+              "flex lg:hidden items-center justify-center h-10 w-10 rounded-lg transition-colors",
+              onDark ? "text-white hover:bg-white/10" : "text-slate-700 hover:bg-slate-100"
+            )}
             onClick={() => setIsMenuOpen((v) => !v)}
             aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-nav"
           >
-            {isMenuOpen ? (
-              <X className="h-5 w-5" aria-hidden />
-            ) : (
-              <Menu className="h-5 w-5" aria-hidden />
-            )}
+            {isMenuOpen ? <X className="h-6 w-6" aria-hidden /> : <Menu className="h-6 w-6" aria-hidden />}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
-        <nav
-          id="mobile-nav"
-          className="lg:hidden border-t border-neutral-800 bg-neutral-950/95 backdrop-blur-md"
-          aria-label="Mobile navigation"
-        >
+        <nav id="mobile-nav" className="lg:hidden border-t border-slate-200 bg-white/95 backdrop-blur-md" aria-label="Mobile navigation">
           <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
-            {NAV_LINKS.map((link) => (
+            {[...NAV_LINKS, ...MOBILE_EXTRA].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-md py-2.5 px-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-800/60 transition-colors"
+                className="rounded-lg py-2.5 px-3 text-sm font-medium text-slate-700 hover:text-blue-700 hover:bg-blue-50 transition-colors"
               >
                 {link.label}
               </Link>
             ))}
-            <div className="mt-3 pt-3 border-t border-neutral-800 flex flex-col gap-2">
-              <Link
-                href="/login"
-                className="btn-ghost !w-full !justify-center"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="btn-primary !w-full !justify-center"
-              >
-                Register Team
+            <div className="mt-3 pt-3 border-t border-slate-200 flex flex-col gap-2">
+              <Link href="/login" className="btn-ghost !w-full !justify-center">Log in</Link>
+              <Link href="/register" className="btn-primary !w-full !justify-center">
+                Register Now
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
             </div>

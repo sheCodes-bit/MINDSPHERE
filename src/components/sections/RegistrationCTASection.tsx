@@ -14,61 +14,59 @@ export function RegistrationCTASection({ settings }: RegistrationCTASectionProps
   const isOpen = regStatus === 'open'
 
   return (
-    <section id="register" className="relative py-24 px-4">
+    <section id="register" className="relative py-24 px-4 scroll-mt-24">
       <div className="max-w-4xl mx-auto">
-        <div className="glass-card-accent p-8 md:p-12 text-center relative overflow-hidden">
-          <div className="ambient-glow" aria-hidden />
+        <div className="relative overflow-hidden rounded-3xl p-8 md:p-14 text-center bg-gradient-to-br from-blue-600 via-blue-700 to-violet-700 shadow-glow-lg">
+          <div className="absolute -top-24 -right-16 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" aria-hidden />
+          <div className="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" aria-hidden />
 
-          {/* Badge */}
-          <span className="badge-accent mb-6 inline-flex relative z-10">
-            {isOpen ? '🟢 Registration Open' : regStatus === 'paused' ? '⏸️ Registration Paused' : '🔴 Registration Closed'}
+          <span className="relative z-10 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest bg-white/15 border border-white/25 text-white backdrop-blur-sm">
+            {isOpen ? 'Registration Open' : regStatus === 'paused' ? 'Registration Paused' : 'Registration Closed'}
           </span>
 
-          <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mt-4 relative z-10">
-            {isOpen ? `Ready to Compete in ${BRAND_CONFIG.name}?` : 'Join the Next Computing Challenge'}
+          <h2 className="relative z-10 font-display text-3xl md:text-5xl font-extrabold text-white tracking-tight mt-6">
+            Ready to Ignite Your Potential?
           </h2>
-          <p className="text-slate-400 mt-4 max-w-xl mx-auto leading-relaxed relative z-10 text-sm sm:text-base">
+          <p className="relative z-10 text-blue-100 mt-4 max-w-xl mx-auto leading-relaxed text-sm sm:text-base">
             {isOpen
-              ? `Assemble your team of 2–3 university students and register now to represent your campus in ${BRAND_CONFIG.name}.`
-              : `Registration is currently closed or in review. Log in to monitor your team's verification status or explore competition guidelines.`}
+              ? `Register now and secure your spot at the ${BRAND_CONFIG.name} ${BRAND_CONFIG.subtitle}. Assemble your team of 2–3 students and represent your campus.`
+              : `Registration is currently closed or in review. Log in to monitor your team's verification status or explore the competition guidelines.`}
           </p>
 
-          {/* Info pills */}
-          <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10">
-            <div className="flex items-center gap-2 text-sm text-slate-300 bg-neutral-900/80 rounded-full px-4 py-2 border border-neutral-800">
-              <Users className="h-4 w-4 text-indigo-400" aria-hidden />
+          <div className="relative z-10 flex flex-wrap justify-center gap-3 mt-8">
+            <div className="flex items-center gap-2 text-sm text-white bg-white/10 rounded-full px-4 py-2 border border-white/20">
+              <Users className="h-4 w-4 text-blue-200" aria-hidden />
               Teams of 2–3 students
             </div>
             {maxTeams && (
-              <div className="flex items-center gap-2 text-sm text-slate-300 bg-neutral-900/80 rounded-full px-4 py-2 border border-neutral-800">
-                <UserPlus className="h-4 w-4 text-indigo-400" aria-hidden />
+              <div className="flex items-center gap-2 text-sm text-white bg-white/10 rounded-full px-4 py-2 border border-white/20">
+                <UserPlus className="h-4 w-4 text-blue-200" aria-hidden />
                 Limited to {maxTeams} teams
               </div>
             )}
             {regCloseAt && isOpen && (
-              <div className="flex items-center gap-2 text-sm text-slate-300 bg-neutral-900/80 rounded-full px-4 py-2 border border-neutral-800">
-                <Calendar className="h-4 w-4 text-indigo-400" aria-hidden />
+              <div className="flex items-center gap-2 text-sm text-white bg-white/10 rounded-full px-4 py-2 border border-white/20">
+                <Calendar className="h-4 w-4 text-blue-200" aria-hidden />
                 Closes {formatDate(regCloseAt)}
               </div>
             )}
           </div>
 
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 relative z-10">
-            {isOpen ? (
-              <Link href="/register" className="btn-primary text-base px-8 py-3.5 shadow-glow-md">
-                <UserPlus className="h-4 w-4 mr-1" aria-hidden />
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+            {isOpen && (
+              <Link href="/register" className="inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-base font-bold text-blue-700 bg-white shadow-lg hover:bg-blue-50 hover:-translate-y-0.5 transition-all duration-200">
+                <UserPlus className="h-4 w-4" aria-hidden />
                 Register Your Team
-                <ChevronRight className="h-4 w-4 ml-1" aria-hidden />
+                <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
-            ) : null}
-            <Link href="/login" className="btn-ghost text-base px-8 py-3.5">
-              <LogIn className="h-4 w-4 mr-1" aria-hidden />
+            )}
+            <Link href="/login" className="inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-base font-semibold text-white border border-white/50 hover:bg-white/10 transition-all duration-200">
+              <LogIn className="h-4 w-4" aria-hidden />
               {isOpen ? 'Log In to Existing Account' : 'Sign In'}
             </Link>
           </div>
 
-          <p className="mt-6 text-xs text-slate-500 relative z-10">
+          <p className="relative z-10 mt-6 text-xs text-blue-200/80">
             By registering, your team captain confirms compliance with the {BRAND_CONFIG.name} rules &amp; academic integrity policy.
           </p>
         </div>

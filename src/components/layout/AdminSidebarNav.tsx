@@ -57,7 +57,7 @@ export function AdminSidebarNav() {
             aria-current={isActive ? 'page' : undefined}
           >
             <Icon
-              className={cn('h-4 w-4', isActive ? 'text-indigo-400' : 'text-slate-400')}
+              className={cn('h-4 w-4', isActive ? 'text-blue-600' : 'text-slate-500')}
               aria-hidden
             />
             <span className="truncate">{label}</span>
