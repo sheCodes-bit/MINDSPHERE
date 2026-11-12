@@ -294,4 +294,4 @@ Test files live in `test/`:
 
 ---
 
-© 2025 COMSATS VSPARK — Quiz Competition. All rights reserved.
+© 2026 COMSATS VSPARK — Quiz Competition. All rights reserved.
