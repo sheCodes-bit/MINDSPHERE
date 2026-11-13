@@ -81,12 +81,25 @@ export async function POST(request: NextRequest) {
         .ilike('username', identifier)
         .maybeSingle()
 
-      if (!profile) {
-        accountMissing = true
-      } else {
+      if (profile) {
         const { data: authUser } = await admin.auth.admin.getUserById(profile.id)
         email = authUser.user?.email?.toLowerCase() ?? ''
         if (!email) accountMissing = true
+      } else {
+        // Older/legacy team rows may not have a profiles.username yet. The
+        // registration flow always stores the username and real email on the
+        // member row, so fall back to it before rejecting the login.
+        const { data: member } = await admin
+          .from('team_members')
+          .select('email, user_id')
+          .ilike('username', identifier)
+          .maybeSingle()
+
+        if (member?.email) {
+          email = member.email.toLowerCase()
+        } else {
+          accountMissing = true
+        }
       }
     }
 
