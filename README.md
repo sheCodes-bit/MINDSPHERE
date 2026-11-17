@@ -132,6 +132,12 @@ supabase/migrations/009_question_bank_storage_hardening.sql
 
 -- 10. Full team model, DB-enforced limits, membership RLS, atomic RPC
 supabase/migrations/010_team_registration_redesign.sql
+
+-- 11. Practice-question policy fix (SECURITY DEFINER published check)
+supabase/migrations/011_question_bank_policy_and_grants_fix.sql
+
+-- 12. Locked-down first-admin bootstrap and promotion functions
+supabase/migrations/012_admin_bootstrap_security.sql
 ```
 
 ### Manual Supabase configuration
@@ -167,13 +173,47 @@ supabase/migrations/010_team_registration_redesign.sql
 
 ## Creating the First Administrator
 
-After running the migrations, promote a user to admin:
+A fresh project starts with **no administrator**, and public registration can never
+assign the admin role. Promote the first organizer from the Supabase SQL Editor
+(which executes as the database owner):
 
-1. Register an account via the normal sign-up flow.
-2. Open `supabase/bootstrap_admin.sql` and replace the placeholder email with your account email.
-3. Run the script in the Supabase SQL Editor.
+1. Create the organizer account at `/register` (or with Google) and confirm its
+   email address if email confirmation is enabled.
+2. Open **Supabase → SQL Editor** and run, replacing the email with that account:
+   ```sql
+   SELECT public.bootstrap_first_admin('organizer@example.edu');
+   ```
+3. The function returns the promoted email and user ID. Sign out and back in, then
+   open `/admin`.
 
-The user will have `admin` role access on the next login.
+**Why this is safe**
+
+- `bootstrap_first_admin` and `promote_user_to_admin` are `SECURITY DEFINER` and
+  look the account up in `auth.users`; they do not create users or accept passwords.
+- `EXECUTE` is explicitly revoked from `PUBLIC`, `anon` and `authenticated`, and
+  granted only to `service_role`. PostgreSQL grants function execution to `PUBLIC`
+  by default, so this revoke is what prevents a browser/PostgREST caller from
+  promoting themselves.
+- `bootstrap_first_admin` refuses to run once any active admin exists, so it cannot
+  be reused to bypass the normal role-management flow.
+- Every promotion writes a `role_grant` row to `audit_logs`.
+- The service-role key remains server-only; never expose it with a `NEXT_PUBLIC_`
+  prefix or in browser code.
+
+Verify the result:
+
+```sql
+SELECT u.email, r.role, r.is_active, r.granted_at
+FROM auth.users u
+JOIN public.user_roles r ON r.user_id = u.id
+WHERE r.role = 'admin' AND r.is_active = TRUE
+ORDER BY r.granted_at;
+```
+
+After the first admin exists, promote additional organizers from **Admin → Users**.
+For a trusted server-side script only, use the service-role key and call
+`public.promote_user_to_admin('email@example.edu')`. The ready-to-run SQL Editor
+snippet is in `supabase/bootstrap_admin.sql`.
 
 ---
 
