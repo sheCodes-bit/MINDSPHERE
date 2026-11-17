@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,6 +15,49 @@ export default function ResetPasswordPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [status, setStatus] = useState<'checking' | 'ready' | 'invalid'>('checking')
+
+  // Recovery links can arrive as a PKCE ?code= or as #access_token/#refresh_token
+  // tokens. Establish the temporary session before allowing a password update.
+  useEffect(() => {
+    let cancelled = false
+
+    async function establishSession() {
+      const supabase = createClient()
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (error) {
+          if (!cancelled) setStatus('invalid')
+          return
+        }
+        window.history.replaceState(null, '', window.location.pathname)
+      } else if (window.location.hash) {
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+        const accessToken = hash.get('access_token')
+        const refreshToken = hash.get('refresh_token')
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          if (error) {
+            if (!cancelled) setStatus('invalid')
+            return
+          }
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!cancelled) setStatus(user ? 'ready' : 'invalid')
+    }
+
+    establishSession()
+    return () => { cancelled = true }
+  }, [])
 
   const {
     register,
@@ -73,6 +116,26 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="glass-card p-8">
+          {status === 'checking' && (
+            <div className="text-center py-8 text-sm text-slate-500">
+              <div className="h-6 w-6 border-2 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
+              Verifying your reset link…
+            </div>
+          )}
+
+          {status === 'invalid' && (
+            <div className="text-center py-4">
+              <h2 className="text-lg font-bold text-slate-900">This reset link is invalid or expired</h2>
+              <p className="text-sm text-slate-500 mt-2 mb-5">
+                Request a new reset link and open it in the same browser.
+              </p>
+              <Link href="/forgot-password" className="btn-primary w-full justify-center py-3">
+                Request a new link
+              </Link>
+            </div>
+          )}
+
+          {status === 'ready' && (
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
@@ -133,6 +196,7 @@ export default function ResetPasswordPage() {
               )}
             </button>
           </form>
+          )}
         </div>
       </div>
     </div>
