@@ -133,11 +133,13 @@ export default async function AdminParticipantsPage() {
         </div>
       </div>
 
-      {membersError && (
+      {(membersError || authUsers.error) && (
         <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>
-            Roster data could not be loaded: {membersError.message}. Account rows below may be incomplete.
+            {membersError && <>Roster data could not be loaded: {membersError.message}. </>}
+            {authUsers.error && <>Student accounts could not be loaded: {authUsers.error.message}. </>}
+            The list below may be incomplete — a server-side API key problem shows up here rather than in an empty roster.
           </span>
         </div>
       )}

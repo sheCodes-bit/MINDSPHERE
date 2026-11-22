@@ -65,6 +65,7 @@ export default function AdminRegistrationsPage() {
   const [teams, setTeams] = useState<Team[]>([])
   const [groups, setGroups] = useState<UniversityGroup[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [universityFilter, setUniversityFilter] = useState('all')
@@ -87,6 +88,7 @@ export default function AdminRegistrationsPage() {
 
   const fetchTeams = useCallback(async () => {
     setLoading(true)
+    setLoadError(null)
     try {
       const params = new URLSearchParams()
       if (search) params.set('search', search)
@@ -102,7 +104,11 @@ export default function AdminRegistrationsPage() {
       setMaxTeams(data.max_teams_per_university ?? DEFAULT_MAX_TEAMS_PER_UNIVERSITY)
       setLimitDraft(String(data.max_teams_per_university ?? DEFAULT_MAX_TEAMS_PER_UNIVERSITY))
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error fetching registrations')
+      const message = err instanceof Error ? err.message : 'Error fetching registrations'
+      setTeams([])
+      setGroups([])
+      setLoadError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -343,10 +349,32 @@ export default function AdminRegistrationsPage() {
           <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
           Loading registrations…
         </div>
+      ) : loadError ? (
+        <div className="glass-card p-8 text-left">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <h2 className="text-sm font-bold text-red-700">Registrations could not be loaded</h2>
+              <p className="text-xs text-slate-600 mt-1 font-mono break-words">{loadError}</p>
+              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                This is a server-side error, not an empty database. If the message mentions an API key, the
+                project&apos;s service-role key is missing or invalid — update{' '}
+                <code className="bg-slate-100 px-1 py-0.5 rounded">SUPABASE_SERVICE_ROLE_KEY</code> in Vercel
+                and redeploy, then press Refresh.
+              </p>
+              <button onClick={fetchTeams} className="btn-ghost text-xs px-3 py-2 mt-3">
+                <RefreshCw className="h-3.5 w-3.5" /> Try again
+              </button>
+            </div>
+          </div>
+        </div>
       ) : grouped.length === 0 ? (
         <div className="glass-card p-12 text-center text-slate-500 text-sm">
           <ClipboardList className="h-10 w-10 text-slate-400 mx-auto mb-2" />
           No registrations match the current filters.
+          <p className="text-[11px] text-slate-400 mt-2">
+            If students have registered accounts, check Admin → Participants to confirm the accounts exist.
+          </p>
         </div>
       ) : (
         grouped.map(([university, universityTeams]) => {
